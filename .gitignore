@@ -1,0 +1,19 @@
+# xcode 
+build/*
+build
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.tmproj
+build
+Build
+Products
+xcuserdata
+xcuserdata/*
+project.xcworkspace
+project.xcworkspace/*
+
+# osx
+.DS_Store
+profile

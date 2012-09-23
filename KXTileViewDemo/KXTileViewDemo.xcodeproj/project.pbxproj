@@ -1,0 +1,282 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4C012D81160EA62B0083DFFF /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C012D80160EA62B0083DFFF /* UIKit.framework */; };
+		4C012D83160EA62B0083DFFF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C012D82160EA62B0083DFFF /* Foundation.framework */; };
+		4C012D85160EA62B0083DFFF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C012D84160EA62B0083DFFF /* CoreGraphics.framework */; };
+		4C012D8B160EA62B0083DFFF /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4C012D89160EA62B0083DFFF /* InfoPlist.strings */; };
+		4C012D8D160EA62B0083DFFF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C012D8C160EA62B0083DFFF /* main.m */; };
+		4C012D91160EA62B0083DFFF /* KXAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C012D90160EA62B0083DFFF /* KXAppDelegate.m */; };
+		4C012D94160EA62B0083DFFF /* KXViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C012D93160EA62B0083DFFF /* KXViewController.m */; };
+		4CB57675160EAACF00B6E619 /* KXTileView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CB57674160EAACF00B6E619 /* KXTileView.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4C012D7C160EA62B0083DFFF /* KXTileViewDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KXTileViewDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C012D80160EA62B0083DFFF /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		4C012D82160EA62B0083DFFF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		4C012D84160EA62B0083DFFF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		4C012D88160EA62B0083DFFF /* KXTileViewDemo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "KXTileViewDemo-Info.plist"; sourceTree = "<group>"; };
+		4C012D8A160EA62B0083DFFF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		4C012D8C160EA62B0083DFFF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4C012D8E160EA62B0083DFFF /* KXTileViewDemo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "KXTileViewDemo-Prefix.pch"; sourceTree = "<group>"; };
+		4C012D8F160EA62B0083DFFF /* KXAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KXAppDelegate.h; sourceTree = "<group>"; };
+		4C012D90160EA62B0083DFFF /* KXAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KXAppDelegate.m; sourceTree = "<group>"; };
+		4C012D92160EA62B0083DFFF /* KXViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KXViewController.h; sourceTree = "<group>"; };
+		4C012D93160EA62B0083DFFF /* KXViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KXViewController.m; sourceTree = "<group>"; };
+		4CB57673160EAACF00B6E619 /* KXTileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KXTileView.h; sourceTree = "<group>"; };
+		4CB57674160EAACF00B6E619 /* KXTileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KXTileView.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4C012D79160EA62B0083DFFF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C012D81160EA62B0083DFFF /* UIKit.framework in Frameworks */,
+				4C012D83160EA62B0083DFFF /* Foundation.framework in Frameworks */,
+				4C012D85160EA62B0083DFFF /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4C012D71160EA62B0083DFFF = {
+			isa = PBXGroup;
+			children = (
+				4C012D86160EA62B0083DFFF /* KXTileViewDemo */,
+				4C012D7F160EA62B0083DFFF /* Frameworks */,
+				4C012D7D160EA62B0083DFFF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4C012D7D160EA62B0083DFFF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4C012D7C160EA62B0083DFFF /* KXTileViewDemo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4C012D7F160EA62B0083DFFF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4C012D80160EA62B0083DFFF /* UIKit.framework */,
+				4C012D82160EA62B0083DFFF /* Foundation.framework */,
+				4C012D84160EA62B0083DFFF /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4C012D86160EA62B0083DFFF /* KXTileViewDemo */ = {
+			isa = PBXGroup;
+			children = (
+				4C012D8F160EA62B0083DFFF /* KXAppDelegate.h */,
+				4C012D90160EA62B0083DFFF /* KXAppDelegate.m */,
+				4C012D92160EA62B0083DFFF /* KXViewController.h */,
+				4CB57673160EAACF00B6E619 /* KXTileView.h */,
+				4CB57674160EAACF00B6E619 /* KXTileView.m */,
+				4C012D93160EA62B0083DFFF /* KXViewController.m */,
+				4C012D87160EA62B0083DFFF /* Supporting Files */,
+			);
+			path = KXTileViewDemo;
+			sourceTree = "<group>";
+		};
+		4C012D87160EA62B0083DFFF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4C012D88160EA62B0083DFFF /* KXTileViewDemo-Info.plist */,
+				4C012D89160EA62B0083DFFF /* InfoPlist.strings */,
+				4C012D8C160EA62B0083DFFF /* main.m */,
+				4C012D8E160EA62B0083DFFF /* KXTileViewDemo-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4C012D7B160EA62B0083DFFF /* KXTileViewDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4C012D9A160EA62B0083DFFF /* Build configuration list for PBXNativeTarget "KXTileViewDemo" */;
+			buildPhases = (
+				4C012D78160EA62B0083DFFF /* Sources */,
+				4C012D79160EA62B0083DFFF /* Frameworks */,
+				4C012D7A160EA62B0083DFFF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KXTileViewDemo;
+			productName = KXTileViewDemo;
+			productReference = 4C012D7C160EA62B0083DFFF /* KXTileViewDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4C012D73160EA62B0083DFFF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = KX;
+				LastUpgradeCheck = 0440;
+				ORGANIZATIONNAME = "Kevin Fang";
+			};
+			buildConfigurationList = 4C012D76160EA62B0083DFFF /* Build configuration list for PBXProject "KXTileViewDemo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 4C012D71160EA62B0083DFFF;
+			productRefGroup = 4C012D7D160EA62B0083DFFF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4C012D7B160EA62B0083DFFF /* KXTileViewDemo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4C012D7A160EA62B0083DFFF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C012D8B160EA62B0083DFFF /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4C012D78160EA62B0083DFFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C012D8D160EA62B0083DFFF /* main.m in Sources */,
+				4C012D91160EA62B0083DFFF /* KXAppDelegate.m in Sources */,
+				4C012D94160EA62B0083DFFF /* KXViewController.m in Sources */,
+				4CB57675160EAACF00B6E619 /* KXTileView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		4C012D89160EA62B0083DFFF /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4C012D8A160EA62B0083DFFF /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4C012D98160EA62B0083DFFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		4C012D99160EA62B0083DFFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		4C012D9B160EA62B0083DFFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "KXTileViewDemo/KXTileViewDemo-Prefix.pch";
+				INFOPLIST_FILE = "KXTileViewDemo/KXTileViewDemo-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		4C012D9C160EA62B0083DFFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "KXTileViewDemo/KXTileViewDemo-Prefix.pch";
+				INFOPLIST_FILE = "KXTileViewDemo/KXTileViewDemo-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4C012D76160EA62B0083DFFF /* Build configuration list for PBXProject "KXTileViewDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C012D98160EA62B0083DFFF /* Debug */,
+				4C012D99160EA62B0083DFFF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4C012D9A160EA62B0083DFFF /* Build configuration list for PBXNativeTarget "KXTileViewDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C012D9B160EA62B0083DFFF /* Debug */,
+				4C012D9C160EA62B0083DFFF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4C012D73160EA62B0083DFFF /* Project object */;
+}
