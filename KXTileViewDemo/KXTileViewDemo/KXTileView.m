@@ -8,6 +8,7 @@
 
 
 #import "KXTileView.h"
+#import "KXTile.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
@@ -15,22 +16,63 @@
 @property (nonatomic, assign) NSInteger page;
 @property (nonatomic, assign) NSInteger row;
 @property (nonatomic, assign) NSInteger column;
+@property (nonatomic, readonly) NSInteger maxRows;
+@property (nonatomic, readonly) NSInteger maxColumns;
+
+- (id)initWithMaxRow:(NSInteger)maxRow maxColumn:(NSInteger)maxColumn;
+- (void)increment;
+
 @end
 
 @implementation KXTileSlot
-@synthesize page, row, column;
+@synthesize page, row, column, maxRows, maxColumns;
+
+- (id)initWithMaxRow:(NSInteger)maxRow maxColumn:(NSInteger)maxColumn
+{
+    self = [super init];
+    if (self) {
+        maxRows = maxRow;
+        maxColumns = maxColumn;
+    }
+    return self;
+}
+
+
+- (void)increment
+{
+    if (self.column >= maxColumns - 1) {
+        if (self.row >= self.maxRows -1) {
+            self.page++;
+            self.row = 0;
+            self.column = 0;
+        }
+        else {
+            self.row++;
+            self.column = 0;
+        }
+    }
+    else {
+        self.column++;
+    }
+}
 @end
 
 @interface KXTileView ()
 
 @property (nonatomic, retain) UIScrollView *scrollView;
 @property (nonatomic, retain) NSMutableArray *tiles;
-@property (nonatomic, assign) NSInteger rowForNextEmptySlot;
-@property (nonatomic, assign) NSInteger columnForNextEmptySlot;
-@property (nonatomic, assign) KXTileSlot *nextSlot;
 
+//Internal state stuff
+@property (nonatomic, assign) NSInteger nextIndexToLoad;
+@property (nonatomic, assign) KXTileSlot *nextSlotToLoad;
+@property (nonatomic, assign) KXTileSlot *nextEmptySlot;
+
+//Scrolling state stuff
+@property (nonatomic, assign) NSInteger previousScrollPage;
 
 - (void)initializeLayout;
+- (void)intiializeTiles;
+- (void)loadNextPage;
 
 - (CGFloat)originXForTileAtColumn:(NSInteger)column;
 - (NSInteger)currentPageIndex;
@@ -45,12 +87,12 @@
 @synthesize columnsPerPage = _columnsPerPage;
 @synthesize marginHeight = _marginHeight;
 @synthesize marginWidth = _verticalMarginWidth;
+
 @synthesize delegate = _delegate;
 @synthesize dataSource = _dataSource;
 
-@synthesize rowForNextEmptySlot = _rowForNextEmptySlot;
-@synthesize columnForNextEmptySlot = _columnForNextEmptySlot;
-@synthesize nextSlot = _nextSlot;
+@synthesize nextSlotToLoad = _nextSlotToLoad;
+@synthesize nextEmptySlot = _nextEmptySlot;
 
 @synthesize scrollView = _scrollView;
 
@@ -61,8 +103,9 @@
     self = [super initWithFrame:frame];
     if (self) {
         _scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        self.scrollView.backgroundColor = [UIColor blackColor];
+        self.scrollView.backgroundColor = [UIColor blueColor];
         self.scrollView.contentSize = self.bounds.size;
+        self.scrollView.delegate = self;
         [self addSubview:self.scrollView];
         
         //intialize properties with default values
@@ -72,10 +115,17 @@
         self.marginHeight = 20;
         self.marginWidth = 20;
         
-        _nextSlot = [[KXTileSlot alloc] init];
-        self.nextSlot.page = 0;
-        self.nextSlot.row = 0;
-        self.nextSlot.column = 0;
+        _nextEmptySlot = [[KXTileSlot alloc] initWithMaxRow:self.rowsPerPage maxColumn:self.columnsPerPage];
+        self.nextEmptySlot.page = 0;
+        self.nextEmptySlot.row = 0;
+        self.nextEmptySlot.column = 0;
+        
+        _nextSlotToLoad = [[KXTileSlot alloc] initWithMaxRow:self.rowsPerPage maxColumn:self.columnsPerPage];
+        self.nextSlotToLoad.page = 0;
+        self.nextSlotToLoad.row = 0;
+        self.nextSlotToLoad.column = 0;
+        
+        self.nextIndexToLoad = 0;
         
         //intialize internal store of tiles;
         _tiles = [[NSMutableArray alloc] init];
@@ -87,7 +137,8 @@
 {
     self.scrollView = nil;
     self.tiles = nil;
-    self.nextSlot = nil;
+    self.nextEmptySlot = nil;
+    self.nextSlotToLoad = nil;
     [super dealloc];
 }
 
@@ -97,6 +148,7 @@
 {
     _dataSource = dataSource;
     [self initializeLayout];
+    [self intiializeTiles];
 }
 
 #pragma mark - convenience methods for returning sizes of rows and cols
@@ -120,25 +172,16 @@
     }
 }
 
-#pragma mark - private methods
+#pragma mark - scrollView delegate
 
-- (void)incrementNextSlot {
-    if (self.nextSlot.column >= self.columnsPerPage - 1) {
-        if (self.nextSlot.row >= self.rowsPerPage - 1) {
-            self.nextSlot.page++;
-            self.nextSlot.row = 0;
-            self.nextSlot.column = 0;
-            
-        }
-        else {
-            self.nextSlot.row++;
-            self.nextSlot.column = 0;
-        }
-    }
-    else {
-        self.nextSlot.column++;
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if (self.scrollView.contentOffset.x + self.bounds.size.width * 2 > self.nextSlotToLoad.page * self.pageWidth
+        && self.nextIndexToLoad < [self.dataSource numberOfTilesInTileView:self]) {
+        [self loadNextPage];
     }
 }
+
+#pragma mark - private methods
 
 - (void)initializeLayout
 {
@@ -149,34 +192,63 @@
         //Figure out how wide the tile will be
         if ([self.dataSource respondsToSelector:@selector(tileView:canShowTileWithWidthLessEqualTo:atIndex:)]) {
             if ([self.dataSource tileView:self canShowTileWithWidthLessEqualTo:kTileColumnWidth2 atIndex:i]
-                && self.nextSlot.column + kTileColumnWidth2 <= self.columnsPerPage) {
+                && self.nextEmptySlot.column + kTileColumnWidth2 <= self.columnsPerPage) {
                 colWidth = kTileColumnWidth2;
             }
         }
         
-        if (self.scrollView.contentSize.width < (self.nextSlot.page + 1) * self.pageWidth) {
+        if (self.scrollView.contentSize.width < (self.nextEmptySlot.page + 1) * self.pageWidth) {
             CGFloat newWidth = self.scrollView.contentSize.width + self.pageWidth;
             self.scrollView.contentSize = CGSizeMake(newWidth, self.scrollView.contentSize.height);
         }
 
         
-        CGRect newFrame = [self frameForTileAtPage:self.nextSlot.page row:self.nextSlot.row column:self.nextSlot.column tileColumnWidth:colWidth];
-        UIView *newTile = [[UIView alloc] initWithFrame:newFrame];
+        CGRect newFrame = [self frameForTileAtPage:self.nextEmptySlot.page row:self.nextEmptySlot.row column:self.nextEmptySlot.column tileColumnWidth:colWidth];
+        KXTile *newTile = [[KXTile alloc] initWithFrame:newFrame];
         newTile.backgroundColor = [UIColor whiteColor];
-        newTile.layer.borderWidth = 4.0;
-        newTile.layer.borderColor = [UIColor purpleColor].CGColor;
+        
+        UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
+        [newTile addGestureRecognizer:tapRecognizer];
+        [tapRecognizer release];
 
         [self.scrollView addSubview:newTile];
         [self.tiles addObject:newTile];
         [newTile release];
-        
+                
         //Update nextSlot state
-        [self incrementNextSlot];
+        [self.nextEmptySlot increment];
         if (colWidth == kTileColumnWidth2) {
-            [self incrementNextSlot];
+            [self.nextEmptySlot increment];
         }
     }
 }
+
+- (void)intiializeTiles
+{
+    NSInteger pagesToLoad = (NSInteger) self.bounds.size.width / self.pageWidth * 2;
+    for (int i = 0; i < pagesToLoad; i++) {
+        [self loadNextPage];
+    }
+}
+
+- (void)loadNextPage
+{
+    NSInteger currentPage = self.nextSlotToLoad.page;
+    while (currentPage == self.nextSlotToLoad.page && self.nextIndexToLoad < [self.dataSource numberOfTilesInTileView:self]) {
+        UIView * tile = [self.tiles objectAtIndex:self.nextIndexToLoad];
+        [tile addSubview:[self.dataSource tileView:self contentViewForTileAtIndex:self.nextIndexToLoad]];
+        
+        [self.nextSlotToLoad increment];
+        self.nextIndexToLoad++;
+    }
+}
+
+- (void)handleGesture:(UIGestureRecognizer *)gestureRecognizer
+{
+    KXTile *tappedTile = (KXTile *)gestureRecognizer.view;
+    tappedTile.backgroundColor = [UIColor orangeColor];
+}
+
 
 #pragma mark - convenience methods for getting coordinates of tiles
 

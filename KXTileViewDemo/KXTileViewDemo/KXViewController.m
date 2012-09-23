@@ -42,7 +42,9 @@
 
 - (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index
 {
-    return [[[UIView alloc] init] autorelease];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, 50, 50)];
+    label.text = [NSString stringWithFormat:@"%d", index];
+    return label;
 }
 
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth) width atIndex:(NSInteger)index

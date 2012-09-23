@@ -16,7 +16,7 @@ typedef enum {
 @protocol KXTileViewDataSource;
 @protocol KXTileViewDelegate;
 
-@interface KXTileView : UIView
+@interface KXTileView : UIView <UIScrollViewDelegate>
 
 @property (nonatomic, assign) CGFloat pageWidth;
 @property (nonatomic, assign) CGFloat rowsPerPage;
@@ -29,6 +29,11 @@ typedef enum {
 
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth;
 - (CGFloat)tileHeight;
+
+
+//scroll view delegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView;
 
 @end
 
