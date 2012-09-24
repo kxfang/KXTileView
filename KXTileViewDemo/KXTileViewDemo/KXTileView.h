@@ -30,6 +30,8 @@ typedef enum {
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth;
 - (CGFloat)tileHeight;
 
+- (void)resetLayout;
+
 
 //scroll view delegate
 
@@ -44,7 +46,7 @@ typedef enum {
 
 @optional
 
-- (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth) width atIndex:(NSInteger)index;
+- (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth)width atIndex:(NSInteger)index;
 
 @optional
 

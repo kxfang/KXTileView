@@ -10,4 +10,6 @@
 
 @interface KXTile : UIView
 
+- (void)addTarget:(id)target action:(SEL)action;
+
 @end

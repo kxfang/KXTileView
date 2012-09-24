@@ -115,20 +115,6 @@
         self.marginHeight = 20;
         self.marginWidth = 20;
         
-        _nextEmptySlot = [[KXTileSlot alloc] initWithMaxRow:self.rowsPerPage maxColumn:self.columnsPerPage];
-        self.nextEmptySlot.page = 0;
-        self.nextEmptySlot.row = 0;
-        self.nextEmptySlot.column = 0;
-        
-        _nextSlotToLoad = [[KXTileSlot alloc] initWithMaxRow:self.rowsPerPage maxColumn:self.columnsPerPage];
-        self.nextSlotToLoad.page = 0;
-        self.nextSlotToLoad.row = 0;
-        self.nextSlotToLoad.column = 0;
-        
-        self.nextIndexToLoad = 0;
-        
-        //intialize internal store of tiles;
-        _tiles = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -142,13 +128,43 @@
     [super dealloc];
 }
 
+- (void)resetLayout
+{
+    self.nextEmptySlot = nil;
+    self.nextSlotToLoad = nil;
+    
+    for (UIView *tile in self.tiles) {
+        [tile removeFromSuperview];
+    }
+    self.tiles = nil;
+    
+    _nextEmptySlot = [[KXTileSlot alloc] initWithMaxRow:self.rowsPerPage maxColumn:self.columnsPerPage];
+    self.nextEmptySlot.page = 0;
+    self.nextEmptySlot.row = 0;
+    self.nextEmptySlot.column = 0;
+    
+    _nextSlotToLoad = [[KXTileSlot alloc] initWithMaxRow:self.rowsPerPage maxColumn:self.columnsPerPage];
+    self.nextSlotToLoad.page = 0;
+    self.nextSlotToLoad.row = 0;
+    self.nextSlotToLoad.column = 0;
+    
+    //intialize internal store of tiles;
+    _tiles = [[NSMutableArray alloc] init];
+    
+    self.nextIndexToLoad = 0;
+    
+    [self initializeLayout];
+    [self intiializeTiles];
+}
+
 #pragma mark - setter/getter overrides
 
 - (void)setDataSource:(id<KXTileViewDataSource>)dataSource
 {
-    _dataSource = dataSource;
-    [self initializeLayout];
-    [self intiializeTiles];
+    if (_dataSource != dataSource) {
+        _dataSource = dataSource;
+        [self resetLayout];
+    }
 }
 
 #pragma mark - convenience methods for returning sizes of rows and cols
@@ -160,7 +176,7 @@
 
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth
 {
-    CGFloat singleTileWidth = (self.pageWidth- self.marginWidth * (self.columnsPerPage + 1)) / self.columnsPerPage;
+    CGFloat singleTileWidth = (self.pageWidth - self.marginWidth * (self.columnsPerPage + 1)) / self.columnsPerPage;
     switch (tileColumnWidth) {
         case kTileColumnWidth1:
             //width per column minus margin
@@ -207,9 +223,7 @@
         KXTile *newTile = [[KXTile alloc] initWithFrame:newFrame];
         newTile.backgroundColor = [UIColor whiteColor];
         
-        UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
-        [newTile addGestureRecognizer:tapRecognizer];
-        [tapRecognizer release];
+        [newTile addTarget:self action:@selector(handleGesture:)];
 
         [self.scrollView addSubview:newTile];
         [self.tiles addObject:newTile];
@@ -225,7 +239,7 @@
 
 - (void)intiializeTiles
 {
-    NSInteger pagesToLoad = (NSInteger) self.bounds.size.width / self.pageWidth * 2;
+    NSInteger pagesToLoad = MAX((NSInteger) self.bounds.size.width / self.pageWidth * 2, 1);
     for (int i = 0; i < pagesToLoad; i++) {
         [self loadNextPage];
     }
@@ -243,10 +257,11 @@
     }
 }
 
-- (void)handleGesture:(UIGestureRecognizer *)gestureRecognizer
+- (void)handleGesture:(KXTile *)tile
 {
-    KXTile *tappedTile = (KXTile *)gestureRecognizer.view;
-    tappedTile.backgroundColor = [UIColor orangeColor];
+    if ([self.delegate respondsToSelector:@selector(tileView:didSelectTileAtIndex:)]) {
+        [self.delegate tileView:self didSelectTileAtIndex:[self.tiles indexOfObject:tile]];
+    }
 }
 
 

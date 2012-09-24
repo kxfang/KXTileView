@@ -21,6 +21,7 @@
     KXTileView *tileView = [[KXTileView alloc] initWithFrame:self.view.bounds];
     tileView.delegate = self;
     tileView.dataSource = self;
+    [tileView resetLayout];
     [self.view addSubview:tileView];
 }
 
@@ -37,7 +38,7 @@
 
 - (NSInteger)numberOfTilesInTileView:(KXTileView *)tileView
 {
-    return 35;
+    return 90;
 }
 
 - (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index
@@ -52,6 +53,10 @@
     //    if (index % 6 > 2) return true; return false;
     // return YES;
     return index % 3;
+}
+
+- (void)tileView:(KXTileView *)tileView didSelectTileAtIndex:(NSInteger)index {
+    NSLog(@"Tapped %d!", index);
 }
 
 
