@@ -12,7 +12,7 @@
 @interface KXViewController : UIViewController <KXTileViewDataSource, KXTileViewDelegate>
 
 - (NSInteger)numberOfTilesInTileView:(KXTileView *)tileView;
-- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index;
+- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
 
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth) width atIndex:(NSInteger)index;
 

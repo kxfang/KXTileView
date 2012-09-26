@@ -14,6 +14,6 @@
 
 @property (strong, nonatomic) UIWindow *window;
 
-@property (strong, nonatomic) KXViewController *viewController;
+@property (strong, nonatomic) UIViewController *viewController;
 
 @end

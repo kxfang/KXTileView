@@ -27,10 +27,14 @@ typedef enum {
 @property (nonatomic, assign) id<KXTileViewDelegate>delegate;
 @property (nonatomic, assign) id<KXTileViewDataSource>dataSource;
 
+@property (nonatomic, assign) BOOL swipeActionEnabled;
+
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth;
 - (CGFloat)tileHeight;
 
 - (void)resetLayout;
+- (void)zoomIntoTileAtIndex:(NSInteger)index;
+- (void)zoomOutOfTile;
 
 
 //scroll view delegate
@@ -42,13 +46,13 @@ typedef enum {
 @protocol KXTileViewDataSource <NSObject>
 
 - (NSInteger)numberOfTilesInTileView:(KXTileView *)tileView;
-- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index;
+- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
 
 @optional
 
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth)width atIndex:(NSInteger)index;
-
-@optional
+- (CGFloat)tileView:(KXTileView *)tileView heightForViewForSwipedTileAtIndex:(NSInteger)index;
+- (UIView *)tileView:(KXTileView *)tileView contextViewForSwipedTileAtIndex:(NSInteger)index;
 
 @end
 
@@ -57,6 +61,7 @@ typedef enum {
 @optional
 
 - (void)tileView:(KXTileView *)tileView didSelectTileAtIndex:(NSInteger)index;
-
+- (void)tileView:(KXTileView *)tileView didFinishZoomInTileAtIndex:(NSInteger)index;
+- (void)tileView:(KXTileView *)tileView didFinishZoomOutTileAtIndex:(NSInteger)index;
 
 @end

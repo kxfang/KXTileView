@@ -27,9 +27,14 @@ typedef enum {
 
 @implementation KXTile
 
+@synthesize shouldBounceOnTouch = _shouldBounceOnTouch;
+
 @synthesize touchState = _touchState;
 @synthesize target = _target;
 @synthesize touchAction = _touchAction;
+
+@synthesize contentView = _contentView;
+@synthesize clippingView = _clippingView;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -48,20 +53,44 @@ typedef enum {
         layer.shadowOpacity = 1.0;
         layer.shadowRadius = 0.0;
         self.clipsToBounds = NO;
+        
+        UIView *clippingView = [[UIView alloc] initWithFrame:self.bounds];
+        clippingView.clipsToBounds = YES;
+        clippingView.alpha = 1.0;
+        [self addSubview:clippingView];
+        [self sendSubviewToBack:clippingView];
+        self.clippingView = clippingView;
+        [clippingView release];
+        
+        self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        self.clippingView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
 
         self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+        
+        self.contentView = nil;
+        self.shouldBounceOnTouch = YES;
     }
     return self;
 }
 
+- (void)dealloc
+{
+    self.clippingView = nil;
+    [super dealloc];
+}
+
 - (void)transformOnTouch
 {
-    self.transform = CGAffineTransformMakeScale(KXTILE_TOUCH_TRANSFORM_SCALE, KXTILE_TOUCH_TRANSFORM_SCALE);
+    if (self.shouldBounceOnTouch) {
+        self.transform = CGAffineTransformMakeScale(KXTILE_TOUCH_TRANSFORM_SCALE, KXTILE_TOUCH_TRANSFORM_SCALE);
+    }
 }
 
 - (void)transformOnTouchEnded
 {
-    self.transform = CGAffineTransformMakeScale(1.0, 1.0);
+    if (self.shouldBounceOnTouch) {
+        self.transform = CGAffineTransformMakeScale(1.0, 1.0);
+    }
 }
 
 - (void)handleGesture:(UIGestureRecognizer *)recognizer
@@ -123,6 +152,15 @@ typedef enum {
 - (void)addTarget:(id)target action:(SEL)action {
     self.target = target;
     self.touchAction = action;
+}
+
+- (void)setContentView:(UIView *)contentView {
+    if (self.contentView.superview != nil) {
+        [self.contentView removeFromSuperview];
+    }
+    [_contentView release];
+    _contentView = contentView;
+    [self.clippingView addSubview:contentView];
 }
 
 

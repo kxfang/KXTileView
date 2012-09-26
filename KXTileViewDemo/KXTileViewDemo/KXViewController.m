@@ -14,15 +14,20 @@
 
 @implementation KXViewController
 
+- (void)loadView
+{
+    KXTileView *tileView = [[KXTileView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
+    tileView.delegate = self;
+    tileView.dataSource = self;
+    [tileView resetLayout];
+    self.view = tileView;
+    [tileView release];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    KXTileView *tileView = [[KXTileView alloc] initWithFrame:self.view.bounds];
-    tileView.delegate = self;
-    tileView.dataSource = self;
-    [tileView resetLayout];
-    [self.view addSubview:tileView];
 }
 
 - (void)viewDidUnload
@@ -41,10 +46,12 @@
     return 90;
 }
 
-- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index
+- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame
 {
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, 50, 50)];
+    UILabel *label = [[UILabel alloc] initWithFrame:frame];
     label.text = [NSString stringWithFormat:@"%d", index];
+    label.backgroundColor = [UIColor purpleColor];
+    label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     return label;
 }
 
@@ -57,6 +64,14 @@
 
 - (void)tileView:(KXTileView *)tileView didSelectTileAtIndex:(NSInteger)index {
     NSLog(@"Tapped %d!", index);
+    [tileView zoomIntoTileAtIndex:index];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(didTapDone)];
+}
+
+- (void)didTapDone
+{
+    [(KXTileView *)self.view zoomOutOfTile];
+    self.navigationItem.rightBarButtonItem = nil;
 }
 
 

@@ -10,6 +10,10 @@
 
 @interface KXTile : UIView
 
+@property (nonatomic, retain) UIView *contentView;
+@property (nonatomic, retain) UIView *clippingView;
+@property (nonatomic, assign) BOOL shouldBounceOnTouch;
+
 - (void)addTarget:(id)target action:(SEL)action;
 
 @end
