@@ -10,9 +10,13 @@
 
 @interface KXViewController ()
 
+@property (nonatomic, assign) NSInteger lastSwipedTileIndex;
+
 @end
 
 @implementation KXViewController
+
+@synthesize lastSwipedTileIndex = _lastSwipedTileIndex;
 
 - (void)loadView
 {
@@ -50,9 +54,28 @@
 {
     UILabel *label = [[UILabel alloc] initWithFrame:frame];
     label.text = [NSString stringWithFormat:@"%d", index];
-    label.backgroundColor = [UIColor purpleColor];
-    label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+    label.backgroundColor = [UIColor whiteColor];
+    label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     return label;
+}
+
+- (void)tileView:(KXTileView *)tileView didSwipeTileAtIndex:(NSInteger)index {
+    self.lastSwipedTileIndex = index;
+}
+
+- (UIView *)tileView:(KXTileView *)tileView contextViewForSwipedTileAtIndex:(NSInteger)index {
+    UIView *contextView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 400, 80)];
+    UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    deleteButton.frame = CGRectMake(160, 0, 80, 80);
+    [contextView addSubview:deleteButton];
+    contextView.backgroundColor = [UIColor darkGrayColor];
+    [deleteButton addTarget:self action:@selector(didTapDeleteButtonInContextView) forControlEvents:UIControlEventTouchUpInside];
+    [deleteButton setTitle:@"Delete" forState:UIControlStateNormal];
+    deleteButton.titleLabel.font = [UIFont systemFontOfSize:15.0];
+    deleteButton.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+    [deleteButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [contextView autorelease];
+    return contextView;
 }
 
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth) width atIndex:(NSInteger)index
@@ -72,6 +95,10 @@
 {
     [(KXTileView *)self.view zoomOutOfTile];
     self.navigationItem.rightBarButtonItem = nil;
+}
+
+- (void)didTapDeleteButtonInContextView {
+    NSLog(@"Tapped button 1 at index: %d", self.lastSwipedTileIndex);
 }
 
 

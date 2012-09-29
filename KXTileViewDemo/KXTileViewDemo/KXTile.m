@@ -48,10 +48,10 @@ typedef enum {
         
         CALayer *layer = self.layer;        
         layer.shouldRasterize = YES;
-        layer.shadowOffset = CGSizeMake(0.0, 2.0);
-        layer.shadowColor = [UIColor blackColor].CGColor;
-        layer.shadowOpacity = 1.0;
-        layer.shadowRadius = 0.0;
+        layer.shadowOffset = CGSizeMake(1.0, 3.0);
+        layer.shadowColor = [UIColor grayColor].CGColor;
+        layer.shadowOpacity = 0.8;
+        layer.shadowRadius = 2.0;
         self.clipsToBounds = NO;
         
         UIView *clippingView = [[UIView alloc] initWithFrame:self.bounds];
@@ -62,8 +62,8 @@ typedef enum {
         self.clippingView = clippingView;
         [clippingView release];
         
-        self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-        self.clippingView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
+        self.clippingView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
 
         self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
         

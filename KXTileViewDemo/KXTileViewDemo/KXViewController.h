@@ -16,6 +16,6 @@
 
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth) width atIndex:(NSInteger)index;
 
-
+- (void)tileView:(KXTileView *)tileView didSwipeTileAtIndex:(NSInteger)index;
 
 @end

@@ -138,7 +138,7 @@ typedef enum {
     self = [super initWithFrame:frame];
     if (self) {
         _scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        self.scrollView.backgroundColor = [UIColor blueColor];
+        self.scrollView.backgroundColor = [UIColor lightGrayColor];
         self.scrollView.delegate = self;
         [self addSubview:self.scrollView];
         
@@ -146,8 +146,8 @@ typedef enum {
         self.pageWidth = self.frame.size.width - 50;
         self.rowsPerPage = 4;
         self.columnsPerPage = 3;
-        self.marginHeight = 20;
-        self.marginWidth = 20;
+        self.marginHeight = 15;
+        self.marginWidth = 15;
         
         self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         self.autoresizesSubviews = YES;
@@ -286,7 +286,11 @@ typedef enum {
 
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth
 {
-    CGFloat singleTileWidth = (self.pageWidth - self.marginWidth * (self.columnsPerPage + 1)) / self.columnsPerPage;
+    int pagingOffset = 0;
+    if (self.scrollView.pagingEnabled) {
+        pagingOffset = 1;
+    }
+    CGFloat singleTileWidth = (self.pageWidth - self.marginWidth * (self.columnsPerPage + pagingOffset)) / self.columnsPerPage;
     switch (tileColumnWidth) {
         case kTileColumnWidth1:
             //width per column minus margin
@@ -393,30 +397,42 @@ typedef enum {
         
         [self cancelSwipe];
         KXTile *swipedTile = (KXTile *)swipeRecognizer.view;
-            UIView *contextView = nil;
-            self.swipedTileIndex = [self.tiles indexOfObject:swipedTile];
-            self.swipedTile = swipedTile;
-            self.swipedTileCachedFrame = swipedTile.contentView.frame;
-            if ([self.dataSource respondsToSelector:@selector(tileView:contextViewForSwipedTileAtIndex:)]) {
-                contextView = [[self.dataSource tileView:self contextViewForSwipedTileAtIndex:self.swipedTileIndex] retain];
-            }
-            else {
-                CGFloat contextViewHeight = swipedTile.bounds.size.height * 0.2;
-                contextView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, swipedTile.bounds.size.width, contextViewHeight)];
-                contextView.backgroundColor = [UIColor yellowColor];
-            }
+        UIView *contextView = nil;
+        self.swipedTileIndex = [self.tiles indexOfObject:swipedTile];
+        self.swipedTile = swipedTile;
+        self.swipedTileCachedFrame = swipedTile.contentView.frame;
+        
+        CGFloat heightRatio = 0.2;
+        if ([self.dataSource respondsToSelector:@selector(tileView:heightRatioForContextViewAtIndex:)]) {
+            heightRatio = [self.dataSource tileView:self heightRatioForContextViewAtIndex:self.swipedTileIndex];
+        }
+        CGFloat contextViewHeight = swipedTile.bounds.size.height * heightRatio;
+        
+        if ([self.dataSource respondsToSelector:@selector(tileView:contextViewForSwipedTileAtIndex:)]) {
+            contextView = [[self.dataSource tileView:self contextViewForSwipedTileAtIndex:self.swipedTileIndex] retain];
+            contextView.frame = CGRectMake(0, 0, swipedTile.bounds.size.width, contextViewHeight);
+        }
+        else {
+            contextView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, swipedTile.bounds.size.width, contextViewHeight)];
+            contextView.backgroundColor = [UIColor yellowColor];
+        }
         contextView.tag = KXTileContextViewTag;
-            [swipedTile.clippingView addSubview:contextView];
-            [swipedTile.clippingView sendSubviewToBack:contextView];
+        [swipedTile.clippingView addSubview:contextView];
+        [swipedTile.clippingView sendSubviewToBack:contextView];
         
         [contextView release];
-
-            [UIView animateWithDuration:0.2 animations:^{
-                swipedTile.contentView.center = CGPointMake(swipedTile.contentView.center.x, swipedTile.contentView.center.y + contextView.bounds.size.height);
-            }];
-            self.state = KXTileViewStateSwiped;
-    }
         
+        [UIView animateWithDuration:0.2 animations:^{
+            swipedTile.contentView.center = CGPointMake(swipedTile.contentView.center.x, swipedTile.contentView.center.y + contextView.bounds.size.height);
+        }];
+        
+        if ([self.delegate respondsToSelector:@selector(tileView:didSwipeTileAtIndex:)]) {
+            [self.delegate tileView:self didSwipeTileAtIndex:self.swipedTileIndex];
+        }
+        
+        self.state = KXTileViewStateSwiped;
+    }
+    
 }
 
 - (void)handleTileTap:(KXTile *)tile
