@@ -35,6 +35,7 @@ typedef enum {
 - (void)resetLayout;
 - (void)zoomIntoTileAtIndex:(NSInteger)index;
 - (void)zoomOutOfTile;
+- (void)removeTileAtIndex:(NSInteger)index animated:(BOOL)animated;  //client state (e.g. indices) should be updated before calling this method
 
 
 //scroll view delegate
@@ -50,7 +51,7 @@ typedef enum {
 
 @optional
 
-- (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth)width atIndex:(NSInteger)index;
+- (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidth:(KXTileColumnWidth)width atIndex:(NSInteger)index;
 - (UIView *)tileView:(KXTileView *)tileView contextViewForSwipedTileAtIndex:(NSInteger)index;
 - (CGFloat)tileView:(KXTileView *)tileView heightRatioForContextViewAtIndex:(NSInteger)index; //height ratio is from 0.0 to 1.0. for example, a value of 0.2 means the context view will take up 20% of the height of the tile
 

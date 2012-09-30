@@ -29,14 +29,25 @@
 @implementation KXTileSlot
 @synthesize page, row, column, maxRows, maxColumns;
 
-- (id)initWithMaxRow:(NSInteger)maxRow maxColumn:(NSInteger)maxColumn
-{
+- (id)initWithMaxRow:(NSInteger)maxRow maxColumn:(NSInteger)maxColumn page:(NSInteger)p row:(NSInteger)r column:(NSInteger)c {
     self = [super init];
     if (self) {
         maxRows = maxRow;
         maxColumns = maxColumn;
+        page = p;
+        row = r;
+        column = c;
     }
     return self;
+}
+
+- (id)initWithMaxRow:(NSInteger)maxRow maxColumn:(NSInteger)maxColumn
+{
+    return [self initWithMaxRow:maxRow maxColumn:maxColumn page:0 row:0 column:0];
+}
+
+- (id)initWithKXTileSlot:(KXTileSlot *)slot {
+    return [self initWithMaxRow:slot.maxRows maxColumn:slot.maxColumns page:slot.page row:slot.row column:slot.column];
 }
 
 
@@ -57,6 +68,24 @@
         self.column++;
     }
 }
+
+- (void)decrement
+{
+    if (self.column == 0 && self.row == 0) {
+        if (self.page > 0) {
+            self.page--;
+            self.row = self.maxRows - 1;
+            self.column = self.maxColumns - 1;
+        }
+    }
+    else if (self.column == 0) {
+        self.column = self.maxColumns - 1;
+        self.row--;
+    }
+    else {
+        self.column --;
+    }
+}
 @end
 
 typedef enum {
@@ -68,6 +97,7 @@ typedef enum {
 @interface KXTileView ()
 
 @property (nonatomic, retain) UIScrollView *scrollView;
+@property (nonatomic, retain) UIView *scrollViewOverlay;
 @property (nonatomic, retain) NSMutableArray *tiles;
 
 //Internal state stuff
@@ -75,6 +105,7 @@ typedef enum {
 @property (nonatomic, assign) NSInteger nextIndexToLoad;
 @property (nonatomic, assign) KXTileSlot *nextSlotToLoad;
 @property (nonatomic, assign) KXTileSlot *nextEmptySlot;
+@property (nonatomic, retain) NSMutableArray *tileSlots; //stores slots corresponding to each tile
 
 //Properties relating to tile-zooming
 @property (nonatomic, assign) CGRect zoomedInTileCachedFrame;
@@ -118,6 +149,7 @@ typedef enum {
 @synthesize nextIndexToLoad = _nextIndexToLoad;
 @synthesize nextSlotToLoad = _nextSlotToLoad;
 @synthesize nextEmptySlot = _nextEmptySlot;
+@synthesize tileSlots = _tileSlots;
 
 @synthesize zoomedInTileCachedFrame = _zoomedTileCachedFrame;
 @synthesize zoomedInTile = _zoomedInTile;
@@ -130,6 +162,7 @@ typedef enum {
 @synthesize allowStartSwipe = _allowStartSwipe;
 
 @synthesize scrollView = _scrollView;
+@synthesize scrollViewOverlay = _scrollViewOverlay;
 
 #pragma mark - init methods
 
@@ -141,6 +174,11 @@ typedef enum {
         self.scrollView.backgroundColor = [UIColor lightGrayColor];
         self.scrollView.delegate = self;
         [self addSubview:self.scrollView];
+        
+        _scrollViewOverlay = [[UIView alloc] initWithFrame:self.scrollView.bounds];
+        self.scrollViewOverlay.backgroundColor = [UIColor blackColor];
+        self.scrollViewOverlay.alpha = 0.0;
+        [self.scrollView addSubview:self.scrollViewOverlay];
         
         //intialize properties with default values
         self.pageWidth = self.frame.size.width - 50;
@@ -202,6 +240,9 @@ typedef enum {
     //intialize internal store of tiles;
     _tiles = [[NSMutableArray alloc] init];
     
+    self.tileSlots = nil;
+    _tileSlots = [[NSMutableArray alloc] init];
+    
     self.nextIndexToLoad = 0;
     
     [self initializeLayout];
@@ -251,8 +292,13 @@ typedef enum {
         self.zoomedInTileCachedFrame = tile.frame;
         self.zoomedInTile = tile;
         self.state = KXTileViewStateZoomed;
+        
+        [self.scrollView bringSubviewToFront:self.scrollViewOverlay];
+        [self.scrollView bringSubviewToFront:tile];
+        
         [UIView animateWithDuration:0.4 animations:^{
             tile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
+            self.scrollViewOverlay.alpha = 0.7;
         }completion:^(BOOL finished) {
             if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
                 [self.delegate tileView:self didFinishZoomInTileAtIndex:index];
@@ -268,13 +314,79 @@ typedef enum {
         [UIView animateWithDuration:0.4 animations:^{
             self.zoomedInTile.frame = self.zoomedInTileCachedFrame;
             self.zoomedInTile = nil;
+            self.scrollViewOverlay.alpha = 0.0;
         }completion:^(BOOL finished){
-            if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
+            if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomOutTileAtIndex:)]) {
                 [self.delegate tileView:self didFinishZoomOutTileAtIndex:self.zoomedInTileIndex];
                 self.zoomedInTileIndex = 0;
             }
         }];
     }
+}
+
+- (void)removeTileAtIndex:(NSInteger)index animated:(BOOL)animated {
+    if (animated) {
+        [UIView animateWithDuration:0.4 animations:^{
+            [self removeTileAtIndex:index];
+        }];
+    }
+    else {
+        [self removeTileAtIndex:index];
+    }
+}
+
+- (void)removeTileAtIndex:(NSInteger)index {
+    KXTile *removedTile = [self.tiles objectAtIndex:index];
+    [self.tiles removeObjectAtIndex:index];
+    
+    if (removedTile == self.swipedTile) {
+        self.swipedTile = nil;
+    }
+    
+    [removedTile removeFromSuperview];
+    
+    KXTileSlot *lastSlot = [self.tileSlots lastObject];
+    if (lastSlot.row == 0 && lastSlot.column == 0) {
+        self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width - self.pageWidth, self.scrollView.contentSize.height);
+    }
+    
+    if (index < self.nextIndexToLoad) {
+        self.nextIndexToLoad--;
+        [self.nextSlotToLoad decrement];
+        if (removedTile.bounds.size.width > [self frameForTileAtPage:0 row:0 column:0 tileColumnWidth:kTileColumnWidth1].size.width + 1) {
+            [self.nextSlotToLoad decrement];
+        }
+    }
+    
+    KXTileSlot *currentEmptySlot = [[self.tileSlots objectAtIndex:index] retain];
+    
+    int currentIndex = 0;
+    for (KXTile * tile in self.tiles) {
+        if (currentIndex >= index) {
+            KXTileSlot *newSlot = [[KXTileSlot alloc] initWithKXTileSlot:currentEmptySlot];
+            [self.tileSlots replaceObjectAtIndex:currentIndex withObject:newSlot];
+            [newSlot release];
+            KXTileColumnWidth tileWidth = [self tileWidthForSlot:currentEmptySlot atIndex:currentIndex];
+            CGRect oldFrame = tile.frame;
+            
+            tile.frame = [self frameForTileAtPage:currentEmptySlot.page row:currentEmptySlot.row column:currentEmptySlot.column tileColumnWidth:tileWidth];
+            
+            //if tile size changed, re-query the dataSource for the tile
+            if (oldFrame.size.width != tile.bounds.size.width) {
+                tile.contentView = [self.dataSource tileView:self contentViewForTileAtIndex:currentIndex withFrame:tile.frame];
+                [tile resetShadow];
+            }
+            
+            [currentEmptySlot increment];
+            if (tileWidth == kTileColumnWidth2) {
+                [currentEmptySlot increment];
+            }
+        }
+        currentIndex++;
+    }
+    [self.tileSlots removeLastObject];
+
+    [currentEmptySlot release];
 }
 
 #pragma mark - convenience methods for returning sizes of rows and cols
@@ -313,19 +425,23 @@ typedef enum {
 
 #pragma mark - private methods
 
+- (KXTileColumnWidth)tileWidthForSlot:(KXTileSlot *)slot atIndex:(NSInteger)index{
+    KXTileColumnWidth colWidth = kTileColumnWidth1;
+    
+    if ([self.dataSource respondsToSelector:@selector(tileView:canShowTileWithWidth:atIndex:)]) {
+        if ([self.dataSource tileView:self canShowTileWithWidth:kTileColumnWidth2 atIndex:index]
+            && slot.column + kTileColumnWidth2 <= self.columnsPerPage) {
+            colWidth = kTileColumnWidth2;
+        }
+    }
+    return colWidth;
+}
+
 - (void)initializeLayout
 {
     NSInteger numTiles = [self.dataSource numberOfTilesInTileView:self];
     for (int i = 0; i < numTiles; i++) {
-        KXTileColumnWidth colWidth = kTileColumnWidth1;
-        
-        //Figure out how wide the tile will be
-        if ([self.dataSource respondsToSelector:@selector(tileView:canShowTileWithWidthLessEqualTo:atIndex:)]) {
-            if ([self.dataSource tileView:self canShowTileWithWidthLessEqualTo:kTileColumnWidth2 atIndex:i]
-                && self.nextEmptySlot.column + kTileColumnWidth2 <= self.columnsPerPage) {
-                colWidth = kTileColumnWidth2;
-            }
-        }
+        KXTileColumnWidth colWidth = [self tileWidthForSlot:self.nextEmptySlot atIndex:i];
         
         if (self.scrollView.contentSize.width < (self.nextEmptySlot.page + 1) * self.pageWidth) {
             CGFloat newWidth = self.scrollView.contentSize.width + self.pageWidth;
@@ -348,6 +464,10 @@ typedef enum {
         [self.scrollView addSubview:newTile];
         [self.tiles addObject:newTile];
         [newTile release];
+        
+        KXTileSlot *slot = [[KXTileSlot alloc] initWithKXTileSlot:self.nextEmptySlot];
+        [self.tileSlots addObject:slot];
+        [slot release];
                 
         //Update nextSlot state
         [self.nextEmptySlot increment];
@@ -402,7 +522,7 @@ typedef enum {
         self.swipedTile = swipedTile;
         self.swipedTileCachedFrame = swipedTile.contentView.frame;
         
-        CGFloat heightRatio = 0.2;
+        CGFloat heightRatio = 0.15;
         if ([self.dataSource respondsToSelector:@selector(tileView:heightRatioForContextViewAtIndex:)]) {
             heightRatio = [self.dataSource tileView:self heightRatioForContextViewAtIndex:self.swipedTileIndex];
         }

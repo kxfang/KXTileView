@@ -46,12 +46,7 @@ typedef enum {
         [self addGestureRecognizer:tapRecognizer];
         [tapRecognizer release];
         
-        CALayer *layer = self.layer;        
-        layer.shouldRasterize = YES;
-        layer.shadowOffset = CGSizeMake(1.0, 3.0);
-        layer.shadowColor = [UIColor grayColor].CGColor;
-        layer.shadowOpacity = 0.8;
-        layer.shadowRadius = 2.0;
+        [self resetShadow];
         self.clipsToBounds = NO;
         
         UIView *clippingView = [[UIView alloc] initWithFrame:self.bounds];
@@ -64,8 +59,6 @@ typedef enum {
         
         self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
         self.clippingView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
-
-        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
         
         self.contentView = nil;
         self.shouldBounceOnTouch = YES;
@@ -77,6 +70,16 @@ typedef enum {
 {
     self.clippingView = nil;
     [super dealloc];
+}
+
+- (void)resetShadow {
+    CALayer *layer = self.layer;
+    layer.shouldRasterize = YES;
+    layer.shadowOffset = CGSizeMake(1.0, 3.0);
+    layer.shadowColor = [UIColor grayColor].CGColor;
+    layer.shadowOpacity = 0.8;
+    layer.shadowRadius = 2.0;
+    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
 }
 
 - (void)transformOnTouch

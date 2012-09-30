@@ -14,7 +14,7 @@
 - (NSInteger)numberOfTilesInTileView:(KXTileView *)tileView;
 - (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
 
-- (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidthLessEqualTo:(KXTileColumnWidth) width atIndex:(NSInteger)index;
+- (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidth:(KXTileColumnWidth) width atIndex:(NSInteger)index;
 
 - (void)tileView:(KXTileView *)tileView didSwipeTileAtIndex:(NSInteger)index;
 

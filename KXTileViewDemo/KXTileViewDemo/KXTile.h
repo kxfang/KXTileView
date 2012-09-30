@@ -15,5 +15,6 @@
 @property (nonatomic, assign) BOOL shouldBounceOnTouch;
 
 - (void)addTarget:(id)target action:(SEL)action;
+- (void)resetShadow;
 
 @end
