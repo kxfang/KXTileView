@@ -373,7 +373,7 @@ typedef enum {
             
             //if tile size changed, re-query the dataSource for the tile
             if (oldFrame.size.width != tile.bounds.size.width) {
-                tile.contentView = [self.dataSource tileView:self contentViewForTileAtIndex:currentIndex withFrame:tile.frame];
+                tile.contentView = [self.dataSource tileView:self contentViewForTileAtIndex:currentIndex withFrame:tile.bounds];
                 [tile resetShadow];
             }
             

@@ -58,9 +58,9 @@
     UILabel *label = [[UILabel alloc] initWithFrame:frame];
     label.text = [NSString stringWithFormat:@"View %d", index];
     label.font = [UIFont systemFontOfSize:25.0];
-    label.backgroundColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor orangeColor];
     label.textAlignment = NSTextAlignmentCenter;
-    label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
+    label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     return label;
 //    UIView *contentView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
 //    UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width * 3/7, frame.size.height)];
