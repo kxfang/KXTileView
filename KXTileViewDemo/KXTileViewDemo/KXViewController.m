@@ -94,6 +94,12 @@
     return contextView;
 }
 
+- (UIView *)tileView:(KXTileView *)tileView zoomedInContentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame {
+    UIView *view = [[UIView alloc] initWithFrame:frame];
+    view.backgroundColor = [UIColor orangeColor];
+    return [view autorelease];
+}
+
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidth:(KXTileColumnWidth) width atIndex:(NSInteger)index
 {
     //    if (index % 6 > 2) return true; return false;

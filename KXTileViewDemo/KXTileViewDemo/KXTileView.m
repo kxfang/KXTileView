@@ -13,6 +13,7 @@
 #import <objc/runtime.h>
 
 #define KXTileContextViewTag 54325235
+#define KXTileZoomedInContentViewTag 3425
 
 @interface KXTileSlot : NSObject
 @property (nonatomic, assign) NSInteger page;
@@ -282,6 +283,36 @@ typedef enum {
     }
 }
 
+- (void)animateZoomIn {
+    CGRect frame = self.scrollViewOverlay.frame;
+    frame.origin.x = self.scrollView.contentOffset.x;
+    self.scrollViewOverlay.frame = frame;
+    [UIView animateWithDuration:0.4 animations:^{
+        self.zoomedInTile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
+        self.scrollViewOverlay.alpha = 0.7;
+    }completion:^(BOOL finished) {
+        if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
+            [self.delegate tileView:self didFinishZoomInTileAtIndex:self.zoomedInTileIndex];
+        }
+    }];
+}
+
+- (void)animateZoomOutWithCompletion:(void(^)(void))completion {
+    [UIView animateWithDuration:0.4 animations:^{
+        self.zoomedInTile.frame = self.zoomedInTileCachedFrame;
+        self.scrollViewOverlay.alpha = 0.0;
+    }completion:^(BOOL finished){
+        if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomOutTileAtIndex:)]) {
+            [self.delegate tileView:self didFinishZoomOutTileAtIndex:self.zoomedInTileIndex];
+            self.zoomedInTileIndex = 0;
+        }
+        
+        if (completion != NULL) {
+            [completion invoke];
+        }
+    }];
+}
+
 #pragma mark - public methods
 
 - (void)zoomIntoTileAtIndex:(NSInteger)index {
@@ -291,19 +322,27 @@ typedef enum {
         [self.scrollView bringSubviewToFront:tile];
         self.zoomedInTileCachedFrame = tile.frame;
         self.zoomedInTile = tile;
+        self.zoomedInTileIndex = index;
         self.state = KXTileViewStateZoomed;
         
         [self.scrollView bringSubviewToFront:self.scrollViewOverlay];
         [self.scrollView bringSubviewToFront:tile];
         
-        [UIView animateWithDuration:0.4 animations:^{
-            tile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
-            self.scrollViewOverlay.alpha = 0.7;
-        }completion:^(BOOL finished) {
-            if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
-                [self.delegate tileView:self didFinishZoomInTileAtIndex:index];
-            }
-        }];
+        
+        if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
+            [UIView transitionWithView:tile duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionFlipFromLeft animations:^{
+                UIView *view = [self.dataSource tileView:self zoomedInContentViewForTileAtIndex:index withFrame:self.bounds];
+                view.tag = KXTileZoomedInContentViewTag;
+                tile.clipsToBounds = YES;
+                [tile addSubview:view];
+                [tile bringSubviewToFront:view];
+            } completion:^(BOOL finished) {
+                [self animateZoomIn];
+            }];
+        }
+        else {
+            [self animateZoomIn];
+        }
     }
 }
 
@@ -311,16 +350,24 @@ typedef enum {
     if (self.zoomedInTile != nil) {
         self.zoomedInTile.shouldBounceOnTouch = YES;
         self.state = KXTileViewStateDefault;
-        [UIView animateWithDuration:0.4 animations:^{
-            self.zoomedInTile.frame = self.zoomedInTileCachedFrame;
-            self.zoomedInTile = nil;
-            self.scrollViewOverlay.alpha = 0.0;
-        }completion:^(BOOL finished){
-            if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomOutTileAtIndex:)]) {
-                [self.delegate tileView:self didFinishZoomOutTileAtIndex:self.zoomedInTileIndex];
-                self.zoomedInTileIndex = 0;
-            }
-        }];
+        
+        if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
+            [self animateZoomOutWithCompletion:^{
+                [UIView transitionWithView:self.zoomedInTile duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionFlipFromRight animations:^{
+                    UIView *view = [self.zoomedInTile viewWithTag:KXTileZoomedInContentViewTag];
+                    [view removeFromSuperview];
+                }completion:^(BOOL finished) {
+                    self.zoomedInTile.clipsToBounds = NO;
+                    self.zoomedInTile = nil;
+                }];
+            }];
+        }
+        else {
+            [self animateZoomOutWithCompletion:NULL];
+        }
+        
+
+        
     }
 }
 

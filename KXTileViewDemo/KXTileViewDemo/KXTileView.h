@@ -54,6 +54,7 @@ typedef enum {
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidth:(KXTileColumnWidth)width atIndex:(NSInteger)index;
 - (UIView *)tileView:(KXTileView *)tileView contextViewForSwipedTileAtIndex:(NSInteger)index;
 - (CGFloat)tileView:(KXTileView *)tileView heightRatioForContextViewAtIndex:(NSInteger)index; //height ratio is from 0.0 to 1.0. for example, a value of 0.2 means the context view will take up 20% of the height of the tile
+- (UIView *)tileView:(KXTileView *)tileView zoomedInContentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
 
 @end
 
