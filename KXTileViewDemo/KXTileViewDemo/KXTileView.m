@@ -442,19 +442,14 @@ typedef enum {
 
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth
 {
-    int pagingOffset = 0;
-    if (self.scrollView.pagingEnabled) {
-        pagingOffset = 1;
-    }
-    CGFloat singleTileWidth = (self.pageWidth - self.marginWidth * (self.columnsPerPage + pagingOffset)) / self.columnsPerPage;
     switch (tileColumnWidth) {
         case kTileColumnWidth1:
             //width per column minus margin
-            return singleTileWidth;
+            return self.singleTileWidth;
             
         case kTileColumnWidth2:
             //width as above multiplied by 2 and add margin between tiles
-            return singleTileWidth * 2 + self.marginWidth;
+            return self.singleTileWidth * 2 + self.marginWidth;
     }
 }
 
@@ -611,6 +606,10 @@ typedef enum {
 
 
 #pragma mark - convenience methods for getting coordinates of tiles
+
+- (CGFloat)singleTileWidth {
+    return (self.pageWidth - self.marginWidth * (self.columnsPerPage + (self.scrollView.pagingEnabled ? 1 : 0))) / self.columnsPerPage;
+}
 
 //these coordinates are relative to page number. y value can be considered absolute
 //  x value needs to be added to page number * pageWidth to get absolute x value on the scrollView

@@ -23,6 +23,7 @@ typedef enum {
 @property (nonatomic, assign) CGFloat columnsPerPage;
 @property (nonatomic, assign) CGFloat marginHeight;   //height of horizontal margins between tiles; default is 5
 @property (nonatomic, assign) CGFloat marginWidth;     //width of vertical margins between tiles; default is 5
+@property (nonatomic, readonly) CGFloat singleTileWidth;
 
 @property (nonatomic, assign) id<KXTileViewDelegate>delegate;
 @property (nonatomic, assign) id<KXTileViewDataSource>dataSource;
