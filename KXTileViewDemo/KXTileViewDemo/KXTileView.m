@@ -290,6 +290,9 @@ typedef enum {
     [UIView animateWithDuration:0.4 animations:^{
         self.zoomedInTile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
         self.scrollViewOverlay.alpha = 0.7;
+        UIView *zoomedInView = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
+        zoomedInView.transform = CGAffineTransformMakeScale(1.0, 1.0);
+        zoomedInView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
     }completion:^(BOOL finished) {
         if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
             [self.delegate tileView:self didFinishZoomInTileAtIndex:self.zoomedInTileIndex];
@@ -301,6 +304,15 @@ typedef enum {
     [UIView animateWithDuration:0.4 animations:^{
         self.zoomedInTile.frame = self.zoomedInTileCachedFrame;
         self.scrollViewOverlay.alpha = 0.0;
+        
+        UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
+        CGFloat scaleFactor = self.zoomedInTile.bounds.size.width / self.bounds.size.width;
+        view.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
+        CGPoint center = view.center;
+        center.x *= scaleFactor;
+        center.y *= scaleFactor;
+        view.center = center;
+
     }completion:^(BOOL finished){
         if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomOutTileAtIndex:)]) {
             [self.delegate tileView:self didFinishZoomOutTileAtIndex:self.zoomedInTileIndex];
@@ -332,6 +344,12 @@ typedef enum {
         if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
             UIView *view = [self.dataSource tileView:self zoomedInContentViewForTileAtIndex:index withFrame:self.bounds];
             view.tag = KXTileZoomedInContentViewTag;
+            CGFloat scaleFactor = tile.bounds.size.width / self.bounds.size.width ;
+            view.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
+            CGPoint center = view.center;
+            center.x *= scaleFactor;
+            center.y *= scaleFactor;
+            view.center = center;
             tile.clipsToBounds = YES;
             [UIView transitionWithView:tile.clippingView duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlUp animations:^{
                 [tile.clippingView addSubview:view];

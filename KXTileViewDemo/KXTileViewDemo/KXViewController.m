@@ -95,8 +95,12 @@
 }
 
 - (UIView *)tileView:(KXTileView *)tileView zoomedInContentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame {
-    UIView *view = [[UIView alloc] initWithFrame:frame];
-    view.backgroundColor = [UIColor blackColor];
+    UILabel *view = [[UILabel alloc] initWithFrame:frame];
+    view.backgroundColor = [UIColor whiteColor];
+    view.text = @"Zoomed In Content View";
+    view.numberOfLines = 0;
+    view.font = [UIFont boldSystemFontOfSize:45.0];
+    view.textAlignment = UITextAlignmentCenter;
     return [view autorelease];
 }
 
