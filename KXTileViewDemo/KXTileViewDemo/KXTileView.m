@@ -330,12 +330,12 @@ typedef enum {
         
         
         if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
-            [UIView transitionWithView:tile duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionFlipFromLeft animations:^{
-                UIView *view = [self.dataSource tileView:self zoomedInContentViewForTileAtIndex:index withFrame:self.bounds];
-                view.tag = KXTileZoomedInContentViewTag;
-                tile.clipsToBounds = YES;
-                [tile addSubview:view];
-                [tile bringSubviewToFront:view];
+            UIView *view = [self.dataSource tileView:self zoomedInContentViewForTileAtIndex:index withFrame:self.bounds];
+            view.tag = KXTileZoomedInContentViewTag;
+            tile.clipsToBounds = YES;
+            [UIView transitionWithView:tile.clippingView duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlUp animations:^{
+                [tile.clippingView addSubview:view];
+                [tile.clippingView bringSubviewToFront:view];
             } completion:^(BOOL finished) {
                 [self animateZoomIn];
             }];
@@ -353,8 +353,8 @@ typedef enum {
         
         if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
             [self animateZoomOutWithCompletion:^{
-                [UIView transitionWithView:self.zoomedInTile duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionFlipFromRight animations:^{
-                    UIView *view = [self.zoomedInTile viewWithTag:KXTileZoomedInContentViewTag];
+                [UIView transitionWithView:self.zoomedInTile.clippingView duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlDown animations:^{
+                    UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
                     [view removeFromSuperview];
                 }completion:^(BOOL finished) {
                     self.zoomedInTile.clipsToBounds = NO;
@@ -365,9 +365,6 @@ typedef enum {
         else {
             [self animateZoomOutWithCompletion:NULL];
         }
-        
-
-        
     }
 }
 

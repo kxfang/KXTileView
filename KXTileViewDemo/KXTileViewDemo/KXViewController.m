@@ -96,7 +96,7 @@
 
 - (UIView *)tileView:(KXTileView *)tileView zoomedInContentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame {
     UIView *view = [[UIView alloc] initWithFrame:frame];
-    view.backgroundColor = [UIColor orangeColor];
+    view.backgroundColor = [UIColor blackColor];
     return [view autorelease];
 }
 
