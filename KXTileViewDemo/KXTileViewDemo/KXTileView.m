@@ -563,6 +563,11 @@ typedef enum {
         [newTile addGestureRecognizer:swipeRecognizer];
         swipeRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
         [swipeRecognizer release];
+        
+        UISwipeGestureRecognizer *cancelSwipeRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleTileSwipe:)];
+        [newTile addGestureRecognizer:cancelSwipeRecognizer];
+        cancelSwipeRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
+        [cancelSwipeRecognizer release];
 
         [self.scrollView addSubview:newTile];
         [self.tiles addObject:newTile];
@@ -655,6 +660,9 @@ typedef enum {
         }
         
         self.state = KXTileViewStateSwiped;
+    }
+    else if (self.swipeActionEnabled && swipeRecognizer.direction == UISwipeGestureRecognizerDirectionUp && self.swipedTile != nil) {
+        [self cancelSwipe];
     }
     
 }
