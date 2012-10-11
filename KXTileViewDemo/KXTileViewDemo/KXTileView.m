@@ -14,6 +14,7 @@
 
 #define KXTileContextViewTag 54325235
 #define KXTileZoomedInContentViewTag 3425
+#define KXTileContentViewTag 24325
 
 @interface KXTileSlot : NSObject
 @property (nonatomic, assign) NSInteger page;
@@ -386,23 +387,49 @@ typedef enum {
     }
 }
 
+- (void)animateRemoveTileAtIndex:(NSInteger)index {
+    KXTile *tile = [self.tiles objectAtIndex:index];
+    tile.backgroundColor = [UIColor clearColor];
+    tile.layer.shadowColor = [UIColor clearColor].CGColor;
+    tile.clippingView.backgroundColor = [UIColor clearColor];
+    [UIView transitionWithView:tile.clippingView
+                      duration:0.5
+                       options:UIViewAnimationOptionTransitionCurlUp | UIViewAnimationOptionAllowAnimatedContent
+                    animations:^{
+                        [tile.contentView removeFromSuperview];
+                        [[tile.clippingView viewWithTag:KXTileContextViewTag] removeFromSuperview];
+                    } completion:^(BOOL finished)
+    {
+        [self repositionTilesOnRemoveTileAtIndex:index animated:YES];
+    }];
+}
+
 - (void)removeTileAtIndex:(NSInteger)index animated:(BOOL)animated {
     if (animated) {
-        [UIView animateWithDuration:0.4 animations:^{
-            [self removeTileAtIndex:index];
-        }];
+        UIView *tile = [self.tiles objectAtIndex:index];
+        if (tile == self.swipedTile) {
+            [UIView animateWithDuration:0.2 animations:^{
+                self.swipedTile.contentView.frame = self.swipedTileCachedFrame;
+            } completion:^(BOOL finished) {
+                [self animateRemoveTileAtIndex:index];
+            }];
+        }
+        else {
+            [self animateRemoveTileAtIndex:index];
+        }
     }
     else {
-        [self removeTileAtIndex:index];
+        [self repositionTilesOnRemoveTileAtIndex:index animated:animated];
     }
 }
 
-- (void)removeTileAtIndex:(NSInteger)index {
+- (void)repositionTilesOnRemoveTileAtIndex:(NSInteger)index animated:(BOOL)animated {
     KXTile *removedTile = [self.tiles objectAtIndex:index];
     [self.tiles removeObjectAtIndex:index];
     
     if (removedTile == self.swipedTile) {
         self.swipedTile = nil;
+        self.state = KXTileViewStateDefault;
     }
     
     [removedTile removeFromSuperview];
@@ -422,6 +449,11 @@ typedef enum {
     
     KXTileSlot *currentEmptySlot = [[self.tileSlots objectAtIndex:index] retain];
     
+    CGFloat animationDuration = 0.0;
+    if (animated) {
+        animationDuration = 0.4;
+    }
+    
     int currentIndex = 0;
     for (KXTile * tile in self.tiles) {
         if (currentIndex >= index) {
@@ -430,12 +462,24 @@ typedef enum {
             [newSlot release];
             KXTileColumnWidth tileWidth = [self tileWidthForSlot:currentEmptySlot atIndex:currentIndex];
             CGRect oldFrame = tile.frame;
-            
-            tile.frame = [self frameForTileAtPage:currentEmptySlot.page row:currentEmptySlot.row column:currentEmptySlot.column tileColumnWidth:tileWidth];
+            [UIView animateWithDuration:animationDuration animations:^{
+                tile.frame = [self frameForTileAtPage:currentEmptySlot.page row:currentEmptySlot.row column:currentEmptySlot.column tileColumnWidth:tileWidth];
+            }];
             
             //if tile size changed, re-query the dataSource for the tile
             if (oldFrame.size.width != tile.bounds.size.width) {
-                tile.contentView = [self.dataSource tileView:self contentViewForTileAtIndex:currentIndex withFrame:tile.bounds];
+                [UIView animateWithDuration:animationDuration/2
+                                 animations:^{
+                    tile.contentView.alpha = 0.0;
+                }
+                                 completion:^(BOOL finished) {
+                                     tile.contentView = [self.dataSource tileView:self contentViewForTileAtIndex:currentIndex withFrame:tile.bounds];
+                                     tile.contentView.alpha = 0.0;
+                                     [UIView animateWithDuration:animationDuration/2 animations:^{
+                                         tile.contentView.alpha = 1.0;
+                                     }];
+                                 }];
+                
                 [tile resetShadow];
             }
             
