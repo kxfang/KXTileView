@@ -541,6 +541,7 @@ typedef enum {
 - (void)initializeLayout
 {
     NSInteger numTiles = [self.dataSource numberOfTilesInTileView:self];
+    CGFloat maxContentOffsetX = 0.0;
     for (int i = 0; i < numTiles; i++) {
         KXTileColumnWidth colWidth = [self tileWidthForSlot:self.nextEmptySlot atIndex:i];
         
@@ -551,6 +552,7 @@ typedef enum {
 
         
         CGRect newFrame = [self frameForTileAtPage:self.nextEmptySlot.page row:self.nextEmptySlot.row column:self.nextEmptySlot.column tileColumnWidth:colWidth];
+        maxContentOffsetX = MAX(maxContentOffsetX, newFrame.origin.x + newFrame.size.width + self.marginWidth);
         KXTile *newTile = [[KXTile alloc] initWithFrame:newFrame];
         newTile.autoresizesSubviews = YES;
         newTile.backgroundColor = [UIColor whiteColor];
@@ -576,6 +578,7 @@ typedef enum {
             [self.nextEmptySlot increment];
         }
     }
+    self.scrollView.contentSize = CGSizeMake(maxContentOffsetX, self.scrollView.bounds.size.height);
 }
 
 - (void)intiializeTiles
