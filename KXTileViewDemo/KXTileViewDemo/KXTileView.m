@@ -288,7 +288,7 @@ typedef enum {
     CGRect frame = self.scrollViewOverlay.frame;
     frame.origin.x = self.scrollView.contentOffset.x;
     self.scrollViewOverlay.frame = frame;
-    [UIView animateWithDuration:0.4 animations:^{
+    [UIView animateWithDuration:0.6 animations:^{
         self.zoomedInTile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
         self.scrollViewOverlay.alpha = 0.7;
         UIView *zoomedInView = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
@@ -302,7 +302,7 @@ typedef enum {
 }
 
 - (void)animateZoomOutWithCompletion:(void(^)(void))completion {
-    [UIView animateWithDuration:0.4 animations:^{
+    [UIView animateWithDuration:0.6 animations:^{
         self.zoomedInTile.frame = self.zoomedInTileCachedFrame;
         self.scrollViewOverlay.alpha = 0.0;
         
@@ -352,7 +352,7 @@ typedef enum {
             center.y *= scaleFactor;
             view.center = center;
             tile.clipsToBounds = YES;
-            [UIView transitionWithView:tile.clippingView duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlUp animations:^{
+            [UIView transitionWithView:tile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlUp animations:^{
                 [tile.clippingView addSubview:view];
                 [tile.clippingView bringSubviewToFront:view];
             } completion:^(BOOL finished) {
@@ -372,7 +372,7 @@ typedef enum {
         
         if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
             [self animateZoomOutWithCompletion:^{
-                [UIView transitionWithView:self.zoomedInTile.clippingView duration:0.4 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlDown animations:^{
+                [UIView transitionWithView:self.zoomedInTile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlDown animations:^{
                     UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
                     [view removeFromSuperview];
                 }completion:^(BOOL finished) {
@@ -393,7 +393,7 @@ typedef enum {
     tile.layer.shadowColor = [UIColor clearColor].CGColor;
     tile.clippingView.backgroundColor = [UIColor clearColor];
     [UIView transitionWithView:tile.clippingView
-                      duration:0.5
+                      duration:0.8
                        options:UIViewAnimationOptionTransitionCurlUp | UIViewAnimationOptionAllowAnimatedContent
                     animations:^{
                         [tile.contentView removeFromSuperview];
@@ -408,7 +408,10 @@ typedef enum {
     if (animated) {
         UIView *tile = [self.tiles objectAtIndex:index];
         if (tile == self.swipedTile) {
-            [UIView animateWithDuration:0.2 animations:^{
+            [UIView animateWithDuration:0.4
+                                  delay:0.0
+                                options:UIViewAnimationOptionCurveEaseInOut
+                             animations:^{
                 self.swipedTile.contentView.frame = self.swipedTileCachedFrame;
             } completion:^(BOOL finished) {
                 [self animateRemoveTileAtIndex:index];
@@ -451,7 +454,7 @@ typedef enum {
     
     CGFloat animationDuration = 0.0;
     if (animated) {
-        animationDuration = 0.4;
+        animationDuration = 0.5;
     }
     
     int currentIndex = 0;
@@ -610,7 +613,10 @@ typedef enum {
 {
     if (self.swipedTile != nil) {
         UIView *contextView = [self.swipedTile viewWithTag:KXTileContextViewTag];
-        [UIView animateWithDuration:0.2 animations:^{
+        [UIView animateWithDuration:0.2
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
             self.swipedTile.contentView.frame = self.swipedTileCachedFrame;
             self.swipedTile = nil;
             self.state = KXTileViewStateDefault;
@@ -651,9 +657,13 @@ typedef enum {
         
         [contextView release];
         
-        [UIView animateWithDuration:0.2 animations:^{
+        [UIView animateWithDuration:0.3
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
             swipedTile.contentView.center = CGPointMake(swipedTile.contentView.center.x, swipedTile.contentView.center.y + contextView.bounds.size.height);
-        }];
+        }
+         completion:NULL];
         
         if ([self.delegate respondsToSelector:@selector(tileView:didSwipeTileAtIndex:)]) {
             [self.delegate tileView:self didSwipeTileAtIndex:self.swipedTileIndex];
