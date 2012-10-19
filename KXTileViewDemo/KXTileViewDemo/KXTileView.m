@@ -320,9 +320,12 @@ typedef enum {
         
         UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
         CGFloat scaleFactor = self.zoomedInTile.bounds.size.width / self.bounds.size.width;
+        if (view.bounds.size.height * scaleFactor < self.zoomedInTile.bounds.size.height) {
+            scaleFactor = self.zoomedInTile.bounds.size.height / self.bounds.size.height;
+        }
         view.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
         CGPoint center = view.center;
-        center.x *= scaleFactor;
+        center.x = self.zoomedInTile.bounds.size.width/2;
         center.y *= scaleFactor;
         view.center = center;
 
@@ -359,10 +362,14 @@ typedef enum {
             UIView *view = [self.dataSource tileView:self zoomedInContentViewForTileAtIndex:index withFrame:self.bounds];
             view.tag = KXTileZoomedInContentViewTag;
             [tile.clippingView addSubview:view];
+            [view setNeedsDisplay];
             CGFloat scaleFactor = tile.bounds.size.width / self.bounds.size.width ;
+            if (view.bounds.size.height * scaleFactor < tile.bounds.size.height) {
+                scaleFactor = tile.bounds.size.height / self.bounds.size.height;
+            }
             view.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
             CGPoint center = view.center;
-            center.x *= scaleFactor;
+            center.x = tile.bounds.size.width/2;
             center.y *= scaleFactor;
             view.center = center;
             tile.clipsToBounds = YES;
