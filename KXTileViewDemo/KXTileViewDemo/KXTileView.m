@@ -108,6 +108,7 @@ typedef enum {
 @property (nonatomic, assign) KXTileSlot *nextSlotToLoad;
 @property (nonatomic, assign) KXTileSlot *nextEmptySlot;
 @property (nonatomic, retain) NSMutableArray *tileSlots; //stores slots corresponding to each tile
+@property (nonatomic, assign) BOOL allowTap;
 
 //Properties relating to tile-zooming
 @property (nonatomic, assign) CGRect zoomedInTileCachedFrame;
@@ -152,6 +153,7 @@ typedef enum {
 @synthesize nextSlotToLoad = _nextSlotToLoad;
 @synthesize nextEmptySlot = _nextEmptySlot;
 @synthesize tileSlots = _tileSlots;
+@synthesize allowTap = _allowTap;
 
 @synthesize zoomedInTileCachedFrame = _zoomedTileCachedFrame;
 @synthesize zoomedInTile = _zoomedInTile;
@@ -173,7 +175,7 @@ typedef enum {
     self = [super initWithFrame:frame];
     if (self) {
         _scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        self.scrollView.backgroundColor = [UIColor lightGrayColor];
+        self.scrollView.backgroundColor = [UIColor clearColor];
         self.scrollView.delegate = self;
         [self addSubview:self.scrollView];
         
@@ -269,17 +271,21 @@ typedef enum {
             case KXTileViewStateDefault:
                 self.scrollView.scrollEnabled = YES;
                 self.allowStartSwipe = YES;
+                self.allowTap = YES;
                 break;
                 
             case KXTileViewStateSwiped:
                 self.scrollView.scrollEnabled = YES;
                 self.allowStartSwipe = YES;
+                self.allowTap = YES;
                 break;
                 
             case KXTileViewStateZoomed:
                 [self cancelSwipe];
                 self.scrollView.scrollEnabled = NO;
                 self.allowStartSwipe = NO;
+                self.allowTap = NO;
+                
         }
     }
 }
@@ -288,7 +294,10 @@ typedef enum {
     CGRect frame = self.scrollViewOverlay.frame;
     frame.origin.x = self.scrollView.contentOffset.x;
     self.scrollViewOverlay.frame = frame;
-    [UIView animateWithDuration:0.6 animations:^{
+    [UIView animateWithDuration:0.6
+                          delay:0
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
         self.zoomedInTile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
         self.scrollViewOverlay.alpha = 0.7;
         UIView *zoomedInView = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
@@ -330,6 +339,7 @@ typedef enum {
 
 - (void)zoomIntoTileAtIndex:(NSInteger)index {
     if (index >= 0 && [self.tiles count] > index) {
+        self.state = KXTileViewStateZoomed;
         KXTile *tile = [self.tiles objectAtIndex:index];
         tile.shouldBounceOnTouch = NO;
         [self.scrollView bringSubviewToFront:tile];
@@ -345,6 +355,7 @@ typedef enum {
         if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
             UIView *view = [self.dataSource tileView:self zoomedInContentViewForTileAtIndex:index withFrame:self.bounds];
             view.tag = KXTileZoomedInContentViewTag;
+            [tile.clippingView addSubview:view];
             CGFloat scaleFactor = tile.bounds.size.width / self.bounds.size.width ;
             view.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
             CGPoint center = view.center;
@@ -352,8 +363,10 @@ typedef enum {
             center.y *= scaleFactor;
             view.center = center;
             tile.clipsToBounds = YES;
+            [UIView animateWithDuration:0.8 animations:^{
+                self.scrollViewOverlay.alpha = 0.25;
+            }];
             [UIView transitionWithView:tile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlUp animations:^{
-                [tile.clippingView addSubview:view];
                 [tile.clippingView bringSubviewToFront:view];
             } completion:^(BOOL finished) {
                 [self animateZoomIn];
@@ -368,7 +381,6 @@ typedef enum {
 - (void)zoomOutOfTile {
     if (self.zoomedInTile != nil) {
         self.zoomedInTile.shouldBounceOnTouch = YES;
-        self.state = KXTileViewStateDefault;
         
         if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
             [self animateZoomOutWithCompletion:^{
@@ -378,6 +390,7 @@ typedef enum {
                 }completion:^(BOOL finished) {
                     self.zoomedInTile.clipsToBounds = NO;
                     self.zoomedInTile = nil;
+                    self.state = KXTileViewStateDefault;
                 }];
             }];
         }
@@ -412,7 +425,7 @@ typedef enum {
                                   delay:0.0
                                 options:UIViewAnimationOptionCurveEaseInOut
                              animations:^{
-                self.swipedTile.contentView.frame = self.swipedTileCachedFrame;
+                self.swipedTile.contentContainerView.frame = self.swipedTileCachedFrame;
             } completion:^(BOOL finished) {
                 [self animateRemoveTileAtIndex:index];
             }];
@@ -617,7 +630,7 @@ typedef enum {
                               delay:0.0
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
-            self.swipedTile.contentView.frame = self.swipedTileCachedFrame;
+            self.swipedTile.contentContainerView.frame = self.swipedTileCachedFrame;
             self.swipedTile = nil;
             self.state = KXTileViewStateDefault;
         } completion:^(BOOL finished) {
@@ -635,7 +648,7 @@ typedef enum {
         UIView *contextView = nil;
         self.swipedTileIndex = [self.tiles indexOfObject:swipedTile];
         self.swipedTile = swipedTile;
-        self.swipedTileCachedFrame = swipedTile.contentView.frame;
+        self.swipedTileCachedFrame = swipedTile.contentContainerView.frame;
         
         CGFloat heightRatio = 0.15;
         if ([self.dataSource respondsToSelector:@selector(tileView:heightRatioForContextViewAtIndex:)]) {
@@ -661,7 +674,7 @@ typedef enum {
                               delay:0.0
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
-            swipedTile.contentView.center = CGPointMake(swipedTile.contentView.center.x, swipedTile.contentView.center.y + contextView.bounds.size.height);
+            swipedTile.contentContainerView.center = CGPointMake(swipedTile.contentContainerView.center.x, swipedTile.contentContainerView.center.y + contextView.bounds.size.height);
         }
          completion:NULL];
         
@@ -680,7 +693,7 @@ typedef enum {
 - (void)handleTileTap:(KXTile *)tile
 {
     [self cancelSwipe];
-    if (self.state != KXTileViewStateZoomed) {
+    if (self.allowTap) {
         if ([self.delegate respondsToSelector:@selector(tileView:didSelectTileAtIndex:)]) {
             [self.delegate tileView:self didSelectTileAtIndex:[self.tiles indexOfObject:tile]];
         }

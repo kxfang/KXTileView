@@ -35,6 +35,7 @@ typedef enum {
 @synthesize touchAction = _touchAction;
 
 @synthesize contentView = _contentView;
+@synthesize contentContainerView = _contentContainerView;
 @synthesize clippingView = _clippingView;
 @synthesize tapRecognizer = _tapRecognizer;
 
@@ -59,6 +60,11 @@ typedef enum {
         self.clippingView = clippingView;
         [clippingView release];
         
+        UIView *containerView = [[UIView alloc] initWithFrame:self.bounds];
+        self.contentContainerView = containerView;
+        [self.clippingView addSubview:containerView];
+        [containerView release];
+        
         self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
         self.clippingView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
         self.clippingView.autoresizesSubviews = NO;
@@ -79,7 +85,7 @@ typedef enum {
     CALayer *layer = self.layer;
     layer.shouldRasterize = YES;
     layer.shadowOffset = CGSizeMake(1.0, 3.0);
-    layer.shadowColor = [UIColor grayColor].CGColor;
+    layer.shadowColor = [UIColor blackColor].CGColor;
     layer.shadowOpacity = 0.8;
     layer.shadowRadius = 2.0;
     self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
@@ -165,9 +171,12 @@ typedef enum {
         [self.contentView removeFromSuperview];
     }
     [_contentView release];
-    _contentView = contentView;
-    [contentView addGestureRecognizer:self.tapRecognizer];
-    [self.clippingView addSubview:contentView];
+    _contentView = [contentView retain];
+    if (![self.contentContainerView.gestureRecognizers containsObject:self.tapRecognizer]) {
+        [self.contentContainerView addGestureRecognizer:self.tapRecognizer];
+    }
+    contentView.frame = self.clippingView.bounds;
+    [self.contentContainerView addSubview:contentView];
 }
 
 
