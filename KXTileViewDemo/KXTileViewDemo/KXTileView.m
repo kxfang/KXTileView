@@ -199,6 +199,8 @@ typedef enum {
         
         self.swipeActionEnabled = YES;
         self.allowStartSwipe = YES;
+        self.allowTap = YES;
+        self.state = KXTileViewStateDefault;
     }
     return self;
 }
@@ -285,6 +287,7 @@ typedef enum {
                 self.scrollView.scrollEnabled = NO;
                 self.allowStartSwipe = NO;
                 self.allowTap = NO;
+                break;
                 
         }
     }
