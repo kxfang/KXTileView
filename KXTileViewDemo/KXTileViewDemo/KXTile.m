@@ -21,6 +21,7 @@ typedef enum {
 @property (nonatomic, assign) KXTileTouchState touchState;
 @property (nonatomic, assign) id target;
 @property (nonatomic, assign) SEL touchAction;
+@property (nonatomic, retain) UITapGestureRecognizer *tapRecognizer;
 
 @end
 
@@ -35,6 +36,7 @@ typedef enum {
 
 @synthesize contentView = _contentView;
 @synthesize clippingView = _clippingView;
+@synthesize tapRecognizer = _tapRecognizer;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -43,7 +45,7 @@ typedef enum {
         self.touchState = KXTileTouchStateDefault;
         
         UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
-        [self addGestureRecognizer:tapRecognizer];
+        self.tapRecognizer = tapRecognizer;
         [tapRecognizer release];
         
         [self resetShadow];
@@ -164,6 +166,7 @@ typedef enum {
     }
     [_contentView release];
     _contentView = contentView;
+    [contentView addGestureRecognizer:self.tapRecognizer];
     [self.clippingView addSubview:contentView];
 }
 
