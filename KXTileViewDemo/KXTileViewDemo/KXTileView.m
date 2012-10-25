@@ -182,6 +182,7 @@ typedef enum {
         _scrollViewOverlay = [[UIView alloc] initWithFrame:self.scrollView.bounds];
         self.scrollViewOverlay.backgroundColor = [UIColor blackColor];
         self.scrollViewOverlay.alpha = 0.0;
+        self.scrollViewOverlay.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         [self.scrollView addSubview:self.scrollViewOverlay];
         
         //intialize properties with default values
@@ -217,6 +218,12 @@ typedef enum {
 - (void)layoutSubviews
 {
     [self resetLayout];
+    if (self.zoomedInTile != nil) {
+        self.zoomedInTile = nil;
+        [self.scrollView scrollRectToVisible:[[self.tiles objectAtIndex:self.zoomedInTileIndex] frame] animated:NO];
+        self.state = KXTileViewStateDefault;
+        [self zoomIntoTileAtIndex:self.zoomedInTileIndex];
+    }
 }
 
 - (void)resetLayout
@@ -294,9 +301,6 @@ typedef enum {
 }
 
 - (void)animateZoomIn {
-    CGRect frame = self.scrollViewOverlay.frame;
-    frame.origin.x = self.scrollView.contentOffset.x;
-    self.scrollViewOverlay.frame = frame;
     [UIView animateWithDuration:0.6
                           delay:0
                         options:UIViewAnimationOptionBeginFromCurrentState
@@ -373,6 +377,9 @@ typedef enum {
             center.y *= scaleFactor;
             view.center = center;
             tile.clipsToBounds = YES;
+            CGRect frame = self.scrollViewOverlay.frame;
+            frame.origin.x = self.scrollView.contentOffset.x;
+            self.scrollViewOverlay.frame = frame;
             [UIView animateWithDuration:0.8 animations:^{
                 self.scrollViewOverlay.alpha = 0.25;
             }];
@@ -450,7 +457,7 @@ typedef enum {
 }
 
 - (void)repositionTilesOnRemoveTileAtIndex:(NSInteger)index animated:(BOOL)animated {
-    KXTile *removedTile = [self.tiles objectAtIndex:index];
+    KXTile *removedTile = [[self.tiles objectAtIndex:index] retain];
     [self.tiles removeObjectAtIndex:index];
     
     if (removedTile == self.swipedTile) {
@@ -517,6 +524,7 @@ typedef enum {
         currentIndex++;
     }
     [self.tileSlots removeLastObject];
+    [removedTile release];
 
     [currentEmptySlot release];
 }
