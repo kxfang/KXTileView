@@ -176,6 +176,7 @@ typedef enum {
         [self.contentContainerView addGestureRecognizer:self.tapRecognizer];
     }
     contentView.frame = self.clippingView.bounds;
+    self.contentContainerView.frame = self.clippingView.bounds;
     [self.contentContainerView addSubview:contentView];
 }
 
