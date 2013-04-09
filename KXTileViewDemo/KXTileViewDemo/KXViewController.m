@@ -12,6 +12,7 @@
 
 @property (nonatomic, assign) NSInteger lastSwipedTileIndex;
 @property (nonatomic, assign) NSInteger numberOfTiles;
+@property (nonatomic, retain) NSMutableArray *arr;
 
 @end
 
@@ -19,10 +20,15 @@
 
 @synthesize lastSwipedTileIndex = _lastSwipedTileIndex;
 @synthesize numberOfTiles = _numberOfTiles;
+@synthesize arr = _arr;
 
 - (void)loadView
 {
-    self.numberOfTiles = 15;
+    self.numberOfTiles = 30;
+    self.arr = [NSMutableArray arrayWithCapacity:self.numberOfTiles];
+    for (NSInteger i = 0; i < self.numberOfTiles; i++) {
+        [self.arr addObject:[NSNumber numberWithInteger:i]];
+    }
     KXTileView *tileView = [[KXTileView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
     tileView.delegate = self;
     tileView.dataSource = self;
@@ -52,7 +58,7 @@
     label.backgroundColor = [UIColor colorWithRed:0 green:0.533 blue:0.8 alpha:1.0];
     label.textAlignment = NSTextAlignmentCenter;
     label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    return label;
+    return [label autorelease];
 }
 
 - (void)tileView:(KXTileView *)tileView didSwipeTileAtIndex:(NSInteger)index {
@@ -69,19 +75,27 @@
     [deleteButton addTarget:self action:@selector(didTapDeleteButtonInContextView) forControlEvents:UIControlEventTouchUpInside];
     [deleteButton setBackgroundImage:[UIImage imageNamed:@"delete.png"] forState:UIControlStateNormal];
     deleteButton.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
-    [contextView autorelease];
-    return contextView;
+    
+    [deleteButton release];
+    return [contextView autorelease];
 }
 
 - (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame {
+    UIScrollView *container = [[UIScrollView alloc] initWithFrame:frame];
+    container.backgroundColor = [UIColor whiteColor];
     UIImageView *view = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"content-view.png"]];
-    return [view autorelease];
+    view.center = CGPointMake(container.bounds.size.width/2, view.bounds.size.height/2);
+    [container addSubview:view];
+    [view release];
+    container.contentSize = CGSizeMake(container.bounds.size.width, view.bounds.size.height);
+    return [container autorelease];
 }
 
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidth:(KXTileColumnWidth)width atIndex:(NSInteger)index
 {
     // some arbitrary logic to determine the size of the tile; you can base this off your model
-    if (index % 15 <= 2) return NO;
+    int i = [[self.arr objectAtIndex:index] integerValue];
+    if (i % 4 <= 1) return NO;
     else return YES;
 }
 
@@ -103,6 +117,7 @@
 - (void)didTapDeleteButtonInContextView {
     self.numberOfTiles--;
     [((KXTileView*)self.view) removeTileAtIndex:self.lastSwipedTileIndex animated:YES];
+    [self.arr removeObjectAtIndex:self.lastSwipedTileIndex];
 }
 
 

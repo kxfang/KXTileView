@@ -17,3 +17,8 @@ project.xcworkspace/*
 # osx
 .DS_Store
 profile
+
+*.cmproj
+KXTileViewCustom
+KXTileViewCustom/*
+Demo*

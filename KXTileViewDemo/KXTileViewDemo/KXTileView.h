@@ -18,12 +18,15 @@ typedef enum {
 
 @interface KXTileView : UIView <UIScrollViewDelegate>
 
+//changes in the properties below will not be reflected without a call to resetLayout
 @property (nonatomic, assign) CGFloat pageWidth;
 @property (nonatomic, assign) CGFloat rowsPerPage;
 @property (nonatomic, assign) CGFloat columnsPerPage;
 @property (nonatomic, assign) CGFloat marginHeight;   //height of horizontal margins between tiles; default is 5
 @property (nonatomic, assign) CGFloat marginWidth;     //width of vertical margins between tiles; default is 5
 @property (nonatomic, readonly) CGFloat singleTileWidth;
+@property (nonatomic, assign) CGFloat topSpace;
+@property (nonatomic, assign) CGFloat bottomSpace;
 
 @property (nonatomic, assign) id<KXTileViewDelegate>delegate;
 @property (nonatomic, assign) id<KXTileViewDataSource>dataSource;
@@ -32,6 +35,9 @@ typedef enum {
 
 @property (nonatomic, assign) UIColor *backgroundColor;
 @property (nonatomic, assign) BOOL useShadow;  //for now, changes to this property is only reflected after a call to resetLayout
+@property (nonatomic, assign) UIViewAnimationOptions transitionIn;
+@property (nonatomic, assign) UIViewAnimationOptions transitionOut;
+
 
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth;
 - (CGFloat)tileHeight;

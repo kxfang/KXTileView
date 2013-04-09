@@ -46,6 +46,7 @@ typedef enum {
     self = [super initWithFrame:frame];
     if (self) {
         self.touchState = KXTileTouchStateDefault;
+        self.backgroundColor = [UIColor clearColor];
         
         UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
         self.tapRecognizer = tapRecognizer;

@@ -169,42 +169,67 @@ typedef enum {
 
 @synthesize useShadow = _useShadow;
 
+@synthesize transitionIn = _transitionIn;
+@synthesize transitionOut = _transitionOut;
+
+@synthesize topSpace = _topSpace;
+@synthesize bottomSpace = _bottomSpace;
+
 #pragma mark - init methods
+
+- (void)initialize
+{
+    _scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
+    self.scrollView.backgroundColor = [UIColor blackColor];
+    self.scrollView.delegate = self;
+    [self addSubview:self.scrollView];
+    
+    _scrollViewOverlay = [[UIView alloc] initWithFrame:self.scrollView.bounds];
+    self.scrollViewOverlay.backgroundColor = [UIColor blackColor];
+    self.scrollViewOverlay.alpha = 0.0;
+    self.scrollViewOverlay.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    [self.scrollView addSubview:self.scrollViewOverlay];
+    
+    //intialize properties with default values
+    self.pageWidth = self.frame.size.width - 100;
+    self.rowsPerPage = 4;
+    self.columnsPerPage = 3;
+    self.marginHeight = 15;
+    self.marginWidth = 15;
+    
+    self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    self.autoresizesSubviews = YES;
+    
+    self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    self.scrollView.autoresizesSubviews = YES;
+    
+    self.swipeActionEnabled = YES;
+    self.allowStartSwipe = YES;
+    self.allowTap = YES;
+    self.state = KXTileViewStateDefault;
+    
+    self.transitionIn = UIViewAnimationOptionTransitionCurlUp;
+    self.transitionOut = UIViewAnimationOptionTransitionCurlDown;
+    
+    self.topSpace = 0;
+    self.bottomSpace = 0;
+    
+    if (self.dataSource) {
+        [self resetLayout];
+    }
+}
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        _scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        self.scrollView.backgroundColor = [UIColor blackColor];
-        self.scrollView.delegate = self;
-        [self addSubview:self.scrollView];
-        
-        _scrollViewOverlay = [[UIView alloc] initWithFrame:self.scrollView.bounds];
-        self.scrollViewOverlay.backgroundColor = [UIColor blackColor];
-        self.scrollViewOverlay.alpha = 0.0;
-        self.scrollViewOverlay.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        [self.scrollView addSubview:self.scrollViewOverlay];
-        
-        //intialize properties with default values
-        self.pageWidth = self.frame.size.width - 50;
-        self.rowsPerPage = 4;
-        self.columnsPerPage = 3;
-        self.marginHeight = 15;
-        self.marginWidth = 15;
-        
-        self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        self.autoresizesSubviews = YES;
-        
-        self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        self.scrollView.autoresizesSubviews = YES;
-        
-        self.swipeActionEnabled = YES;
-        self.allowStartSwipe = YES;
-        self.allowTap = YES;
-        self.state = KXTileViewStateDefault;
+        [self initialize];
     }
     return self;
+}
+
+- (void)awakeFromNib {
+    [self initialize];
 }
 
 - (void)dealloc
@@ -218,6 +243,7 @@ typedef enum {
 
 - (void)layoutSubviews
 {
+    [super layoutSubviews];
     [self resetLayout];
     if (self.zoomedInTile != nil) {
         self.zoomedInTile = nil;
@@ -317,16 +343,16 @@ typedef enum {
                           delay:0
                         options:UIViewAnimationOptionBeginFromCurrentState
                      animations:^{
-        self.zoomedInTile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
-        self.scrollViewOverlay.alpha = 0.7;
-        UIView *zoomedInView = [self.zoomedInTile.clippingView viewWithTag:KXTileContentViewTag];
-        zoomedInView.transform = CGAffineTransformMakeScale(1.0, 1.0);
-        zoomedInView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2 + 22);
-    }completion:^(BOOL finished) {
-        if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
-            [self.delegate tileView:self didFinishZoomInTileAtIndex:self.zoomedInTileIndex];
-        }
-    }];
+                         self.zoomedInTile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
+                         self.scrollViewOverlay.alpha = 0.7;
+                         UIView *zoomedInView = [self.zoomedInTile.clippingView viewWithTag:KXTileContentViewTag];
+                         zoomedInView.transform = CGAffineTransformMakeScale(1.0, 1.0);
+                         zoomedInView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
+                     }completion:^(BOOL finished) {
+                         if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
+                             [self.delegate tileView:self didFinishZoomInTileAtIndex:self.zoomedInTileIndex];
+                         }
+                     }];
 }
 
 - (void)animateZoomOutWithCompletion:(void(^)(void))completion {
@@ -344,7 +370,7 @@ typedef enum {
         center.x = self.zoomedInTile.bounds.size.width/2;
         center.y *= scaleFactor;
         view.center = center;
-
+        
     }completion:^(BOOL finished){
         if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomOutTileAtIndex:)]) {
             [self.delegate tileView:self didFinishZoomOutTileAtIndex:self.zoomedInTileIndex];
@@ -375,7 +401,7 @@ typedef enum {
         
         
         if ([self.dataSource respondsToSelector:@selector(tileView:contentViewForTileAtIndex:withFrame:)]) {
-            UIView *view = [self.dataSource tileView:self contentViewForTileAtIndex:index withFrame:CGRectMake(0, 44, self.bounds.size.width, self.bounds.size.height - 44)];
+            UIView *view = [self.dataSource tileView:self contentViewForTileAtIndex:index withFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)];
             view.tag = KXTileContentViewTag;
             [tile.clippingView addSubview:view];
             [view setNeedsDisplay];
@@ -395,7 +421,7 @@ typedef enum {
             [UIView animateWithDuration:0.8 animations:^{
                 self.scrollViewOverlay.alpha = 0.25;
             }];
-            [UIView transitionWithView:tile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlUp animations:^{
+            [UIView transitionWithView:tile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | self.transitionIn animations:^{
                 [tile.clippingView bringSubviewToFront:view];
             } completion:^(BOOL finished) {
                 [self animateZoomIn];
@@ -413,7 +439,7 @@ typedef enum {
         
         if ([self.dataSource respondsToSelector:@selector(tileView:contentViewForTileAtIndex:withFrame:)]) {
             [self animateZoomOutWithCompletion:^{
-                [UIView transitionWithView:self.zoomedInTile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlDown animations:^{
+                [UIView transitionWithView:self.zoomedInTile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | self.transitionOut animations:^{
                     UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileContentViewTag];
                     [view removeFromSuperview];
                 }completion:^(BOOL finished) {
@@ -436,14 +462,14 @@ typedef enum {
     tile.clippingView.backgroundColor = [UIColor clearColor];
     [UIView transitionWithView:tile.clippingView
                       duration:0.8
-                       options:UIViewAnimationOptionTransitionCurlUp | UIViewAnimationOptionAllowAnimatedContent
+                       options:self.transitionIn | UIViewAnimationOptionAllowAnimatedContent
                     animations:^{
                         [tile.contentView removeFromSuperview];
                         [[tile.clippingView viewWithTag:KXTileContextViewTag] removeFromSuperview];
                     } completion:^(BOOL finished)
-    {
-        [self repositionTilesOnRemoveTileAtIndex:index animated:YES];
-    }];
+     {
+         [self repositionTilesOnRemoveTileAtIndex:index animated:YES];
+     }];
 }
 
 - (void)removeTileAtIndex:(NSInteger)index animated:(BOOL)animated {
@@ -454,10 +480,10 @@ typedef enum {
                                   delay:0.0
                                 options:UIViewAnimationOptionCurveEaseInOut
                              animations:^{
-                self.swipedTile.contentContainerView.frame = self.swipedTileCachedFrame;
-            } completion:^(BOOL finished) {
-                [self animateRemoveTileAtIndex:index];
-            }];
+                                 self.swipedTile.contentContainerView.frame = self.swipedTileCachedFrame;
+                             } completion:^(BOOL finished) {
+                                 [self animateRemoveTileAtIndex:index];
+                             }];
         }
         else {
             [self animateRemoveTileAtIndex:index];
@@ -515,8 +541,8 @@ typedef enum {
             if (oldFrame.size.width != tile.bounds.size.width) {
                 [UIView animateWithDuration:animationDuration/2
                                  animations:^{
-                    tile.contentView.alpha = 0.0;
-                }
+                                     tile.contentView.alpha = 0.0;
+                                 }
                                  completion:^(BOOL finished) {
                                      tile.contentView = [self.dataSource tileView:self coverViewForTileAtIndex:currentIndex withFrame:tile.bounds];
                                      tile.contentView.alpha = 0.0;
@@ -536,7 +562,7 @@ typedef enum {
     }
     [self.tileSlots removeLastObject];
     [removedTile release];
-
+    
     [currentEmptySlot release];
 }
 
@@ -544,7 +570,7 @@ typedef enum {
 
 - (CGFloat)tileHeight
 {
-    return (self.frame.size.height - self.marginHeight * (self.rowsPerPage + 1)) / self.rowsPerPage;
+    return (self.frame.size.height - self.topSpace - self.bottomSpace - self.marginHeight * (self.rowsPerPage + 1)) / self.rowsPerPage;
 }
 
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth
@@ -594,13 +620,12 @@ typedef enum {
             CGFloat newWidth = self.scrollView.contentSize.width + self.pageWidth;
             self.scrollView.contentSize = CGSizeMake(newWidth, self.scrollView.contentSize.height);
         }
-
+        
         
         CGRect newFrame = [self frameForTileAtPage:self.nextEmptySlot.page row:self.nextEmptySlot.row column:self.nextEmptySlot.column tileColumnWidth:colWidth];
         maxContentOffsetX = MAX(maxContentOffsetX, newFrame.origin.x + newFrame.size.width + self.marginWidth);
         KXTile *newTile = [[KXTile alloc] initWithFrame:newFrame];
         newTile.autoresizesSubviews = YES;
-        newTile.backgroundColor = [UIColor whiteColor];
         
         [newTile addTarget:self action:@selector(handleTileTap:)];
         
@@ -615,7 +640,7 @@ typedef enum {
         [cancelSwipeRecognizer release];
         
         newTile.useShadow = self.useShadow;
-
+        
         [self.scrollView addSubview:newTile];
         [self.tiles addObject:newTile];
         [newTile release];
@@ -623,7 +648,7 @@ typedef enum {
         KXTileSlot *slot = [[KXTileSlot alloc] initWithKXTileSlot:self.nextEmptySlot];
         [self.tileSlots addObject:slot];
         [slot release];
-                
+        
         //Update nextSlot state
         [self.nextEmptySlot increment];
         if (colWidth == kTileColumnWidth2) {
@@ -661,13 +686,13 @@ typedef enum {
                               delay:0.0
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
-            self.swipedTile.contentContainerView.frame = self.swipedTileCachedFrame;
-            self.swipedTile = nil;
-            self.state = KXTileViewStateDefault;
-        } completion:^(BOOL finished) {
-            [contextView removeFromSuperview];
-        }];
-    } 
+                             self.swipedTile.contentContainerView.frame = self.swipedTileCachedFrame;
+                             self.swipedTile = nil;
+                             self.state = KXTileViewStateDefault;
+                         } completion:^(BOOL finished) {
+                             [contextView removeFromSuperview];
+                         }];
+    }
 }
 
 - (void)handleTileSwipe:(UISwipeGestureRecognizer *)swipeRecognizer
@@ -705,9 +730,9 @@ typedef enum {
                               delay:0.0
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
-            swipedTile.contentContainerView.center = CGPointMake(swipedTile.contentContainerView.center.x, swipedTile.contentContainerView.center.y + contextView.bounds.size.height);
-        }
-         completion:NULL];
+                             swipedTile.contentContainerView.center = CGPointMake(swipedTile.contentContainerView.center.x, swipedTile.contentContainerView.center.y + contextView.bounds.size.height);
+                         }
+                         completion:NULL];
         
         if ([self.delegate respondsToSelector:@selector(tileView:didSwipeTileAtIndex:)]) {
             [self.delegate tileView:self didSwipeTileAtIndex:self.swipedTileIndex];
@@ -742,7 +767,7 @@ typedef enum {
 //  x value needs to be added to page number * pageWidth to get absolute x value on the scrollView
 - (CGFloat)originYForTileAtRow:(NSInteger)row
 {
-    return row * ([self tileHeight]) + (row + 1) * self.marginHeight;
+    return row * ([self tileHeight]) + (row + 1) * self.marginHeight + self.topSpace;
 }
 
 - (CGFloat)originXForTileAtColumn:(NSInteger)column
