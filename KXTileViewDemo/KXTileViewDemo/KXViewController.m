@@ -76,7 +76,6 @@
     [deleteButton setBackgroundImage:[UIImage imageNamed:@"delete.png"] forState:UIControlStateNormal];
     deleteButton.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
     
-    [deleteButton release];
     return [contextView autorelease];
 }
 
