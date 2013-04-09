@@ -30,6 +30,9 @@ typedef enum {
 
 @property (nonatomic, assign) BOOL swipeActionEnabled;
 
+@property (nonatomic, assign) UIColor *backgroundColor;
+@property (nonatomic, assign) BOOL useShadow;  //for now, changes to this property is only reflected after a call to resetLayout
+
 - (CGFloat)tileWidthForTileColumnWidth:(KXTileColumnWidth)tileColumnWidth;
 - (CGFloat)tileHeight;
 
@@ -48,14 +51,14 @@ typedef enum {
 @protocol KXTileViewDataSource <NSObject>
 
 - (NSInteger)numberOfTilesInTileView:(KXTileView *)tileView;
-- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
+- (UIView *)tileView:(KXTileView *)tileView coverViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
 
 @optional
 
 - (BOOL)tileView:(KXTileView *)tileView canShowTileWithWidth:(KXTileColumnWidth)width atIndex:(NSInteger)index;
 - (UIView *)tileView:(KXTileView *)tileView contextViewForSwipedTileAtIndex:(NSInteger)index;
 - (CGFloat)tileView:(KXTileView *)tileView heightRatioForContextViewAtIndex:(NSInteger)index; //height ratio is from 0.0 to 1.0. for example, a value of 0.2 means the context view will take up 20% of the height of the tile
-- (UIView *)tileView:(KXTileView *)tileView zoomedInContentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
+- (UIView *)tileView:(KXTileView *)tileView contentViewForTileAtIndex:(NSInteger)index withFrame:(CGRect)frame;
 
 @end
 

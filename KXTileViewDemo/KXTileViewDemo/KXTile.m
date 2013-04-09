@@ -39,6 +39,8 @@ typedef enum {
 @synthesize clippingView = _clippingView;
 @synthesize tapRecognizer = _tapRecognizer;
 
+@synthesize useShadow = _useShadow;
+
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -82,13 +84,20 @@ typedef enum {
 }
 
 - (void)resetShadow {
-    CALayer *layer = self.layer;
-    layer.shouldRasterize = YES;
-    layer.shadowOffset = CGSizeMake(1.0, 3.0);
-    layer.shadowColor = [UIColor blackColor].CGColor;
-    layer.shadowOpacity = 0.8;
-    layer.shadowRadius = 2.0;
-    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+    if (self.useShadow) {
+        CALayer *layer = self.layer;
+        layer.shouldRasterize = YES;
+        layer.shadowOffset = CGSizeMake(1.0, 3.0);
+        layer.shadowColor = [UIColor blackColor].CGColor;
+        layer.shadowOpacity = 0.8;
+        layer.shadowRadius = 2.0;
+        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+    }
+}
+
+- (void)setUseShadow:(BOOL)useShadow {
+    _useShadow = useShadow;
+    [self resetShadow];
 }
 
 - (void)transformOnTouch
@@ -172,8 +181,8 @@ typedef enum {
     }
     [_contentView release];
     _contentView = [contentView retain];
-    if (![self.contentContainerView.gestureRecognizers containsObject:self.tapRecognizer]) {
-        [self.contentContainerView addGestureRecognizer:self.tapRecognizer];
+    if (![self.gestureRecognizers containsObject:self.tapRecognizer]) {
+        [self addGestureRecognizer:self.tapRecognizer];
     }
     contentView.frame = self.clippingView.bounds;
     [self.contentContainerView addSubview:contentView];

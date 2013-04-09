@@ -14,8 +14,9 @@
 		4C012D8D160EA62B0083DFFF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C012D8C160EA62B0083DFFF /* main.m */; };
 		4C012D91160EA62B0083DFFF /* KXAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C012D90160EA62B0083DFFF /* KXAppDelegate.m */; };
 		4C012D94160EA62B0083DFFF /* KXViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C012D93160EA62B0083DFFF /* KXViewController.m */; };
+		4C9432AB1713AFE300AA1A91 /* content-view.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C9432AA1713AFE300AA1A91 /* content-view.png */; };
+		4C9432AD1713B91F00AA1A91 /* delete.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C9432AC1713B91F00AA1A91 /* delete.png */; };
 		4CB57675160EAACF00B6E619 /* KXTileView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CB57674160EAACF00B6E619 /* KXTileView.m */; };
-		4CE7A67B1616E63100B4A503 /* test.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4CE7A67A1616E63100B4A503 /* test.jpg */; };
 		4CFEAA87160FCE3A0030B32A /* KXTile.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFEAA86160FCE3A0030B32A /* KXTile.m */; };
 /* End PBXBuildFile section */
 
@@ -32,9 +33,10 @@
 		4C012D90160EA62B0083DFFF /* KXAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KXAppDelegate.m; sourceTree = "<group>"; };
 		4C012D92160EA62B0083DFFF /* KXViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KXViewController.h; sourceTree = "<group>"; };
 		4C012D93160EA62B0083DFFF /* KXViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KXViewController.m; sourceTree = "<group>"; };
+		4C9432AA1713AFE300AA1A91 /* content-view.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "content-view.png"; sourceTree = "<group>"; };
+		4C9432AC1713B91F00AA1A91 /* delete.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = delete.png; sourceTree = "<group>"; };
 		4CB57673160EAACF00B6E619 /* KXTileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KXTileView.h; sourceTree = "<group>"; };
 		4CB57674160EAACF00B6E619 /* KXTileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KXTileView.m; sourceTree = "<group>"; };
-		4CE7A67A1616E63100B4A503 /* test.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = test.jpg; sourceTree = "<group>"; };
 		4CFEAA85160FCE3A0030B32A /* KXTile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KXTile.h; sourceTree = "<group>"; };
 		4CFEAA86160FCE3A0030B32A /* KXTile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KXTile.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -83,13 +85,14 @@
 		4C012D86160EA62B0083DFFF /* KXTileViewDemo */ = {
 			isa = PBXGroup;
 			children = (
+				4C9432AA1713AFE300AA1A91 /* content-view.png */,
+				4C9432AC1713B91F00AA1A91 /* delete.png */,
 				4C012D8F160EA62B0083DFFF /* KXAppDelegate.h */,
 				4C012D90160EA62B0083DFFF /* KXAppDelegate.m */,
 				4CB57673160EAACF00B6E619 /* KXTileView.h */,
 				4CB57674160EAACF00B6E619 /* KXTileView.m */,
 				4CFEAA85160FCE3A0030B32A /* KXTile.h */,
 				4CFEAA86160FCE3A0030B32A /* KXTile.m */,
-				4CE7A67A1616E63100B4A503 /* test.jpg */,
 				4C012D92160EA62B0083DFFF /* KXViewController.h */,
 				4C012D93160EA62B0083DFFF /* KXViewController.m */,
 				4C012D87160EA62B0083DFFF /* Supporting Files */,
@@ -161,7 +164,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C012D8B160EA62B0083DFFF /* InfoPlist.strings in Resources */,
-				4CE7A67B1616E63100B4A503 /* test.jpg in Resources */,
+				4C9432AB1713AFE300AA1A91 /* content-view.png in Resources */,
+				4C9432AD1713B91F00AA1A91 /* delete.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,8 +13,7 @@
 #import <objc/runtime.h>
 
 #define KXTileContextViewTag 54325235
-#define KXTileZoomedInContentViewTag 3425
-#define KXTileContentViewTag 24325
+#define KXTileContentViewTag 3425
 
 @interface KXTileSlot : NSObject
 @property (nonatomic, assign) NSInteger page;
@@ -168,6 +167,8 @@ typedef enum {
 @synthesize scrollView = _scrollView;
 @synthesize scrollViewOverlay = _scrollViewOverlay;
 
+@synthesize useShadow = _useShadow;
+
 #pragma mark - init methods
 
 - (id)initWithFrame:(CGRect)frame
@@ -175,7 +176,7 @@ typedef enum {
     self = [super initWithFrame:frame];
     if (self) {
         _scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        self.scrollView.backgroundColor = [UIColor clearColor];
+        self.scrollView.backgroundColor = [UIColor blackColor];
         self.scrollView.delegate = self;
         [self addSubview:self.scrollView];
         
@@ -293,6 +294,17 @@ typedef enum {
     }
 }
 
+- (UIColor *)backgroundColor {
+    return self.scrollView.backgroundColor;
+}
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor {
+    self.scrollView.backgroundColor = backgroundColor;
+    self.scrollViewOverlay.backgroundColor = backgroundColor;
+}
+
+#pragma mark - animation methods
+
 - (void)animateZoomIn {
     CGRect frame = self.scrollViewOverlay.frame;
     frame.origin.x = self.scrollView.contentOffset.x;
@@ -303,9 +315,9 @@ typedef enum {
                      animations:^{
         self.zoomedInTile.frame = CGRectMake(self.scrollView.contentOffset.x, 0, self.bounds.size.width, self.bounds.size.height);
         self.scrollViewOverlay.alpha = 0.7;
-        UIView *zoomedInView = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
+        UIView *zoomedInView = [self.zoomedInTile.clippingView viewWithTag:KXTileContentViewTag];
         zoomedInView.transform = CGAffineTransformMakeScale(1.0, 1.0);
-        zoomedInView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
+        zoomedInView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2 + 22);
     }completion:^(BOOL finished) {
         if ([self.delegate respondsToSelector:@selector(tileView:didFinishZoomInTileAtIndex:)]) {
             [self.delegate tileView:self didFinishZoomInTileAtIndex:self.zoomedInTileIndex];
@@ -318,7 +330,7 @@ typedef enum {
         self.zoomedInTile.frame = self.zoomedInTileCachedFrame;
         self.scrollViewOverlay.alpha = 0.0;
         
-        UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
+        UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileContentViewTag];
         CGFloat scaleFactor = self.zoomedInTile.bounds.size.width / self.bounds.size.width;
         view.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
         CGPoint center = view.center;
@@ -355,9 +367,9 @@ typedef enum {
         [self.scrollView bringSubviewToFront:tile];
         
         
-        if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
-            UIView *view = [self.dataSource tileView:self zoomedInContentViewForTileAtIndex:index withFrame:self.bounds];
-            view.tag = KXTileZoomedInContentViewTag;
+        if ([self.dataSource respondsToSelector:@selector(tileView:contentViewForTileAtIndex:withFrame:)]) {
+            UIView *view = [self.dataSource tileView:self contentViewForTileAtIndex:index withFrame:CGRectMake(0, 44, self.bounds.size.width, self.bounds.size.height - 44)];
+            view.tag = KXTileContentViewTag;
             [tile.clippingView addSubview:view];
             CGFloat scaleFactor = tile.bounds.size.width / self.bounds.size.width ;
             view.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
@@ -385,10 +397,10 @@ typedef enum {
     if (self.zoomedInTile != nil) {
         self.zoomedInTile.shouldBounceOnTouch = YES;
         
-        if ([self.dataSource respondsToSelector:@selector(tileView:zoomedInContentViewForTileAtIndex:withFrame:)]) {
+        if ([self.dataSource respondsToSelector:@selector(tileView:contentViewForTileAtIndex:withFrame:)]) {
             [self animateZoomOutWithCompletion:^{
                 [UIView transitionWithView:self.zoomedInTile.clippingView duration:0.8 options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionCurlDown animations:^{
-                    UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileZoomedInContentViewTag];
+                    UIView *view = [self.zoomedInTile.clippingView viewWithTag:KXTileContentViewTag];
                     [view removeFromSuperview];
                 }completion:^(BOOL finished) {
                     self.zoomedInTile.clipsToBounds = NO;
@@ -492,13 +504,12 @@ typedef enum {
                     tile.contentView.alpha = 0.0;
                 }
                                  completion:^(BOOL finished) {
-                                     tile.contentView = [self.dataSource tileView:self contentViewForTileAtIndex:currentIndex withFrame:tile.bounds];
+                                     tile.contentView = [self.dataSource tileView:self coverViewForTileAtIndex:currentIndex withFrame:tile.bounds];
                                      tile.contentView.alpha = 0.0;
                                      [UIView animateWithDuration:animationDuration/2 animations:^{
                                          tile.contentView.alpha = 1.0;
                                      }];
                                  }];
-                
                 [tile resetShadow];
             }
             
@@ -587,6 +598,8 @@ typedef enum {
         [newTile addGestureRecognizer:cancelSwipeRecognizer];
         cancelSwipeRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
         [cancelSwipeRecognizer release];
+        
+        newTile.useShadow = self.useShadow;
 
         [self.scrollView addSubview:newTile];
         [self.tiles addObject:newTile];
@@ -618,7 +631,7 @@ typedef enum {
     NSInteger currentPage = self.nextSlotToLoad.page;
     while (currentPage == self.nextSlotToLoad.page && self.nextIndexToLoad < [self.dataSource numberOfTilesInTileView:self]) {
         KXTile * tile = [self.tiles objectAtIndex:self.nextIndexToLoad];
-        tile.contentView = [self.dataSource tileView:self contentViewForTileAtIndex:self.nextIndexToLoad withFrame:tile.bounds];
+        tile.contentView = [self.dataSource tileView:self coverViewForTileAtIndex:self.nextIndexToLoad withFrame:tile.bounds];
         
         [self.nextSlotToLoad increment];
         self.nextIndexToLoad++;

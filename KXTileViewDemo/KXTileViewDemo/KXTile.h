@@ -15,6 +15,8 @@
 @property (nonatomic, retain) UIView *clippingView;
 @property (nonatomic, assign) BOOL shouldBounceOnTouch;
 
+@property (nonatomic, assign) BOOL useShadow;
+
 - (void)addTarget:(id)target action:(SEL)action;
 - (void)resetShadow;
 
