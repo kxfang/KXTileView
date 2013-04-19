@@ -1,4 +1,4 @@
-# LIExposeController
+# KXTileView
 KXTileView is a flexible and simple to use subclass of UIView that allows the developer to create dynamic tiled views for browsing content with an interface similar to the familiar UITableView.
 
 ## Instructions
